@@ -4,12 +4,15 @@
 # --- UI Constants ---
 GRID_AREA_WIDTH = 600
 GRID_AREA_HEIGHT = 600
-PANEL_WIDTH = 250
-WINDOW_WIDTH = GRID_AREA_WIDTH + PANEL_WIDTH
+LEFT_PANEL_WIDTH = 180
+RIGHT_PANEL_WIDTH = 250
+WINDOW_WIDTH = LEFT_PANEL_WIDTH + GRID_AREA_WIDTH + RIGHT_PANEL_WIDTH
 WINDOW_HEIGHT = GRID_AREA_HEIGHT
+GRID_START_X = LEFT_PANEL_WIDTH
 GUTTER = 5
 BORDER_NORMAL = 1
 BORDER_THICK = 4
+BORDER_CUSTOM_THICKNESS = 8
 
 # --- Colors ---
 COLOR_WHITE = (255, 255, 255)
@@ -29,6 +32,13 @@ COLOR_STAR_NUM = (200, 0, 0)
 COLOR_DISABLED_BUTTON = (60, 60, 70)
 COLOR_DISABLED_TEXT = (100, 100, 110)
 
+# --- Drawing Mode Colors (with alpha for transparency) ---
+COLOR_DRAW_RED = (255, 0, 0, 160)
+COLOR_DRAW_BLUE = (0, 0, 255, 160)
+COLOR_DRAW_YELLOW = (255, 215, 0, 160) 
+COLOR_DRAW_GREEN = (0, 200, 0, 160)
+DRAWING_COLORS = [COLOR_DRAW_RED, COLOR_DRAW_BLUE, COLOR_DRAW_YELLOW, COLOR_DRAW_GREEN]
+
 DIFFICULTY_COLORS = {
     'easy':   {'base': (70, 160, 70),  'hover': (90, 190, 90)},
     'medium': {'base': (180, 140, 50), 'hover': (210, 170, 70)},
@@ -37,12 +47,18 @@ DIFFICULTY_COLORS = {
 
 # --- Data Constants ---
 UNIFIED_COLORS_BG = [
-    ("Bright Red",(255,204,204),"\033[48;2;255;204;204m\033[38;2;0;0;0m"),("Bright Green",(204,255,204),"\033[48;2;204;255;204m\033[38;2;0;0;0m"),
-    ("Bright Yellow",(255,255,204),"\033[48;2;255;255;204m\033[38;2;0;0;0m"),("Bright Blue",(204,229,255),"\033[48;2;204;229;255m\033[38;2;0;0;0m"),
-    ("Bright Magenta",(255,204,255),"\033[48;2;255;204;255m\033[38;2;0;0;0m"),("Bright Cyan",(204,255,255),"\033[48;2;204;255;255m\033[38;2;0;0;0m"),
-    ("Light Orange",(255,229,204),"\033[48;2;255;229;204m\033[38;2;0;0;0m"),("Light Purple",(229,204,255),"\033[48;2;229;204;255m\033[38;2;0;0;0m"),
-    ("Light Gray",(224,224,224),"\033[48;2;224;224;224m\033[38;2;0;0;0m"),("Mint",(210,240,210),"\033[48;2;210;240;210m\033[38;2;0;0;0m"),
-    ("Peach",(255,218,185),"\033[48;2;255;218;185m\033[38;2;0;0;0m"),("Sky Blue",(173,216,230),"\033[48;2;173;216;230m\033[38;2;0;0;0m"),
+    ("Bright Red",    (255, 204, 204), "\033[48;2;255;204;204m\033[38;2;0;0;0m"),
+    ("Bright Green",  (204, 255, 204), "\033[48;2;204;255;204m\033[38;2;0;0;0m"),
+    ("Bright Yellow", (255, 255, 204), "\033[48;2;255;255;204m\033[38;2;0;0;0m"),
+    ("Bright Blue",   (204, 229, 255), "\033[48;2;204;229;255m\033[38;2;0;0;0m"),
+    ("Bright Magenta",(255, 204, 255), "\033[48;2;255;204;255m\033[38;2;0;0;0m"),
+    ("Bright Cyan",   (204, 255, 255), "\033[48;2;204;255;255m\033[38;2;0;0;0m"),
+    ("Light Orange",  (255, 229, 204), "\033[48;2;255;229;204m\033[38;2;0;0;0m"),
+    ("Light Purple",  (229, 204, 255), "\033[48;2;229;204;255m\033[38;2;0;0;0m"),
+    ("Light Gray",    (224, 224, 224), "\033[48;2;224;224;224m\033[38;2;0;0;0m"),
+    ("Mint",          (210, 240, 210), "\033[48;2;210;240;210m\033[38;2;0;0;0m"),
+    ("Peach",         (255, 218, 185), "\033[48;2;255;218;185m\033[38;2;0;0;0m"),
+    ("Sky Blue",      (173, 216, 230), "\033[48;2;173;216;230m\033[38;2;0;0;0m"),
 ]
 PYGAME_UNIFIED_COLORS = [(c[0], c[1]) for c in UNIFIED_COLORS_BG]
 
