@@ -1,56 +1,66 @@
-# Star Battle Web App
+# Star Battle Playground
 
-This repository contains a web-based version of the Star Battle puzzle game. It features a robust Python/Flask backend for puzzle generation and solving, and a responsive HTML/CSS/JS frontend for gameplay.
+This repository contains a web application for playing and creating Star Battle puzzles, built entirely with client-side technologies (**HTML, CSS, and JavaScript**). The application logic, including puzzle generation and solving, runs in your browser, making it fast and responsive.
 
----
+-----
 
 ## Live Demo
 
-Click the link below to play the live version instantly in your browser. No setup is required.
+You can play the live version instantly in your browser. No setup is needed.
 
-[**https://joseph-w-bryant.github.io/StarbattlesTools/LiveDemo**](https://joseph-w-bryant.github.io/StarbattlesTools/LiveDemo)
+[**https://joseph-w-bryant.github.io/StarbattlesTools/LiveDemo**](https://joseph-w-bryant.github.io/StarbattlesTools/Main/index.html)
 
----
+-----
+
+## Features
+
+  * **Multiple Interaction Modes**: Seamlessly switch between marking stars, free-form drawing, and creating custom region borders.
+  * **Client-Side Solving**: Generate new puzzles and find solutions instantly without any server-side processing.
+  * **Advanced UI**: Includes a customizable color picker, adjustable brush sizes, and a responsive layout for both desktop and mobile.
+  * **Full History Management**: Robust undo and redo support is available for every action, including marking, drawing, and bordering.
+  * **Save & Load**: Save your puzzle progress, including all marks and drawings, to your browser's local storage and load it back later.
+  * **Import & Export**: Share puzzles with others using the compact Star Battle Notation (SBN) format.
+  * **Smart Assists**: Enable settings like automatic error highlighting and "Auto-X" to fill in logical deductions for you.
+
+-----
 
 ## Running Locally
 
-Follow these instructions if you want to run both the backend server and the frontend on your own machine. This is ideal for development or offline use.
+While the application logic is fully client-side, modern web browsers have security policies (CORS) that restrict loading resources from the local file system. Therefore, to run the app locally, you must serve the files from the project's `Main` directory using a simple local web server.
 
-### 1. Backend Server Setup
-First, ensure you have Python 3 installed.
-**Navigate to the `localWebApp/` directory.** All subsequent commands should be run from here.
-Create and activate a virtual environment (highly recommended):
+1.  **Clone the repository** to your local machine.
+2.  **Navigate into the `Main` directory** in your terminal. For example:
+    ```bash
+    cd path/to/StarbattlesTools/Main
+    ```
+3.  **Start a local server** using one of the options below.
+
+### Option A: Using Node.js (Recommended)
+
+If you have Node.js and npm installed, you can use `npx` to run a temporary server without installing any packages globally. This is a quick and modern approach.
+
 ```bash
-# On macOS/Linux
-python3 -m venv venv
-source venv/bin/activate
-
-# On Windows
-py -m venv venv
-venv\Scripts\activate
+npx serve
 ```
 
-Install the project in "editable" mode. This command reads the `pyproject.toml` file, installs all dependencies, and correctly configures the Python path.
-```bash
-pip install -e .
-```
-*(The `.` refers to the current directory, `localWebApp/`)*
+### Option B: Using Python
 
-### 2. Run the Backend Server
+If you have Python installed, you can use its simple built-in web server.
 
-With your virtual environment still active, run the server:
-```bash
-python run.py
-```
-The backend will now be running at `http://127.0.0.1:5001`. Keep this terminal window open.
+  * For **Python 3**:
+    ```bash
+    python3 -m http.server
+    ```
+  * If you have an older system with **Python 2**:
+    ```bash
+    python -m SimpleHTTPServer
+    ```
 
-### 3. Run the Frontend Application
+<!-- end list -->
 
-With the backend server running, simply open the `localWebApp/index.html` file in your web browser. The application is already configured to connect to your local backend and will be fully functional.
+4.  **Open the application in your browser**. After running the server command, your terminal will display a local URL. Open that URL (typically `http://localhost:3000` for `npx serve` or `http://localhost:8000` for Python) in your browser to run the app.
 
-> **Note:** The `LiveDemo` and `localWebApp` versions are identical except for the `API_BASE_URL` variable in `script.js`, which is pre-set in each version to point to the correct backend (live vs. local).
-
----
+-----
 
 ## Miscellaneous Tools
 
