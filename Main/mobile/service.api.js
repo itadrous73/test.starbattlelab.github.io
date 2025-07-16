@@ -3,7 +3,7 @@
  * Title: Star Battle API and Data Management
  * **********************************************************************************
  * @author Isaiah Tadrous
- * @version 1.1.2
+ * @version 1.1.3
  * *-------------------------------------------------------------------------------
  * This script manages all asynchronous communication with the backend API for the
  * Star Battle puzzle application. Its responsibilities include fetching new
@@ -72,30 +72,42 @@ async function fetchNewPuzzle() {
  * @returns {Promise<void>} A promise that resolves when the solution attempt is complete.
  */
 async function findSolution() {
-    if (state.solution) return; // Don't re-fetch if solution is already known
+    if (state.solution) { // Don't re-solve if solution is already known
+        state.isViewingSolution = !state.isViewingSolution;
+        updateSolutionButtonUI();
+        redrawAllOverlays();
+        return;
+    }
+    
     setLoading(true);
+    setStatus("Solving in your browser... this may take a moment.", null, 0); // Persisting message
+
+    // Use a timeout to allow the UI to update before the potentially blocking solver runs
+    await new Promise(resolve => setTimeout(resolve, 50)); 
+
     try {
-        const response = await fetch(`${API_BASE_URL}/solve`, {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({
-                regionGrid: state.regionGrid,
-                starsPerRegion: state.starsPerRegion,
-                sourcePuzzleData: state.sourcePuzzleData
-            })
-        });
-        if (!response.ok) throw new Error(`Server error: ${response.statusText}`);
-        const data = await response.json();
-        if (data.solution) {
+        // 1. Create an instance of the new solver
+        const solver = new UltimateStarBattleSolver(state.regionGrid, state.starsPerRegion);
+        
+        // 2. Run the solver
+        const result = solver.solve(); // This is a synchronous, blocking call
+
+        // 3. Process the results
+        if (result.solutions && result.solutions.length > 0) {
             setStatus("Solution found! Tap 'View' to see it.", true);
-            state.solution = data.solution;
+            state.solution = result.solutions[0]; // Store the first found solution
+            state.isViewingSolution = true; // Automatically view it the first time
             updateSolutionButtonUI();
+            redrawAllOverlays(); // Redraw to show the solution immediately
         } else {
-            setStatus("No solution exists for this puzzle.", false);
+            setStatus("No solution could be found for this puzzle.", false);
         }
+        
+        console.log("Solver Stats:", result.stats); // Optional: log stats to the console
+
     } catch (error) {
-        console.error("Error finding solution:", error);
-        setStatus("Solver failed.", false);
+        console.error("Error during client-side solving:", error);
+        setStatus("The solver encountered an error.", false);
     } finally {
         setLoading(false);
     }
