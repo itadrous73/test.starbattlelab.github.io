@@ -3,7 +3,7 @@
  * Title: Star Battle API and Data Management
  * **********************************************************************************
  * @author Isaiah Tadrous
- * @version 1.1.3
+ * @version 1.1.4
  * *-------------------------------------------------------------------------------
  * This script manages all asynchronous communication with the backend API for the
  * Star Battle puzzle application. Its responsibilities include fetching new
@@ -80,7 +80,7 @@ async function findSolution() {
     }
     
     setLoading(true);
-    setStatus("Solving in your browser... this may take a moment.", null, 0); // Persisting message
+    setStatus("Solving...", null, 0); // Persisting message
 
     // Use a timeout to allow the UI to update before the potentially blocking solver runs
     await new Promise(resolve => setTimeout(resolve, 50)); 
@@ -121,29 +121,48 @@ async function findSolution() {
  */
 async function checkSolution() {
     setLoading(true);
+    setStatus("Verifying solution...", null, 0);
+
+    // Use a timeout to allow the UI to update before the solver runs
+    await new Promise(resolve => setTimeout(resolve, 50));
+
     try {
-        const response = await fetch(`${API_BASE_URL}/check`, {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({
-                regionGrid: state.regionGrid,
-                playerGrid: state.playerGrid,
-                starsPerRegion: state.starsPerRegion,
-                sourcePuzzleData: state.sourcePuzzleData
-            })
-        });
-        if (!response.ok) throw new Error(`Server error: ${response.statusText}`);
-        const data = await response.json();
-        if (data.isCorrect) {
-            let message = "Correct!";
-            if (data.hashValidated) message += " (Hash Validated)";
-            setStatus(message, true);
+        let canonicalSolution = state.solution;
+
+        // 1. Run the solver if the solution hasn't been found yet.
+        if (!canonicalSolution) {
+            const solver = new UltimateStarBattleSolver(state.regionGrid, state.starsPerRegion);
+            const result = solver.solve();
+            if (result.solutions && result.solutions.length > 0) {
+                canonicalSolution = result.solutions[0];
+                state.solution = canonicalSolution; // Cache the solution for future checks
+                updateSolutionButtonUI();
+            } else {
+                setStatus("Solver could not find a solution to check against.", false);
+                setLoading(false);
+                return;
+            }
+        }
+        
+        // 2. Prepare the player's grid for comparison.
+        // The player grid contains 0s, 1s (stars), and 2s (marks).
+        // We only want to compare the stars (1s) against the solution.
+        const playerStarsGrid = state.playerGrid.map(row => 
+            row.map(cell => (cell === 1 ? 1 : 0))
+        );
+
+        // 3. Compare the player's stars against the canonical solution.
+        const isIdentical = JSON.stringify(playerStarsGrid) === JSON.stringify(canonicalSolution);
+
+        if (isIdentical) {
+            setStatus("Correct!", true);
         } else {
             setStatus("Incorrect. Keep trying!", false);
         }
+
     } catch (error) {
-        console.error("Error checking solution:", error);
-        setStatus("Check failed.", false);
+        console.error("Error checking solution with solver:", error);
+        setStatus("An error occurred during verification.", false);
     } finally {
         setLoading(false);
     }
