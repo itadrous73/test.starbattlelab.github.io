@@ -4,7 +4,7 @@
  * Star Battle Handeling Logic
  *
  * @author Isaiah Tadrous
- * @version 1.0.0
+ * @version 1.0.1
  *
  * -------------------------------------------------------------------------------
  *
@@ -194,8 +194,9 @@ function decodePlayerAnnotations(annotationDataStr, dim) {
             const value = SBN_CHAR_TO_INT[annotationDataStr[charCursor]] || 0;
             const states = [Math.floor(value / 16), Math.floor((value % 16) / 4), value % 4]; // Unpack base-4 values
             for (let i = 0; i < 3; i++) {
-                if (cellCursor + i < dim * dim) {
-                    const { r, c } = flatIndices[cellCursor + i];
+                const shiftedIndex = cellCursor + i - 2;
+                if (shiftedIndex < dim * dim) {
+                    const { r, c } = flatIndices[shiftedIndex];
                     grid[r][c] = sbnToGame[states[i]] || STATE_EMPTY;
                 }
             }
@@ -221,10 +222,10 @@ function encodePlayerAnnotations(playerGrid) {
     const flat = playerGrid.flat().map(cell => gameToSbn[cell] || 0);
 
     if (flat.every(v => v === 0)) return "";
-
+    const shiftedFlat = [0, 0, ...flat];
     let sbnStates = [];
-    for (let i = 0; i < flat.length; i += 3) {
-        let chunk = flat.slice(i, i + 3);
+    for (let i = 0; i < shiftedFlat.length; i += 3) {
+        let chunk = shiftedFlat.slice(i, i + 3);
         while (chunk.length < 3) chunk.push(0);
         const value = chunk[0] * 16 + chunk[1] * 4 + chunk[2];
         sbnStates.push(SBN_INT_TO_CHAR[value]);
