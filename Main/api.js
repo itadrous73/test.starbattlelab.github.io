@@ -4,7 +4,7 @@
  * Star Battle Puzzle - Interactions and State API
  *
  * @author Isaiah Tadrous
- * @version 1.1.0
+ * @version 1.1.1
  *
  * -------------------------------------------------------------------------------
  *
@@ -104,6 +104,19 @@ function handleMouseDown(e) {
         if (state.activeMode === 'draw') {
             preActionState = state.bufferCtx.getImageData(0, 0, state.bufferCanvas.width, state.bufferCanvas.height);
             const painter = (ctx) => {
+                // Set drawing properties for the dot and subsequent line
+                ctx.globalCompositeOperation = 'source-over';
+                ctx.lineCap = 'round';
+                ctx.lineJoin = 'round';
+                ctx.strokeStyle = state.currentColor;
+                ctx.lineWidth = state.brushSize;
+                // Draw a single "dot" by creating a zero-length path and stroking it.
+                // The 'round' lineCap makes it a circle.
+                ctx.beginPath();
+                ctx.moveTo(pos.x, pos.y);
+                ctx.lineTo(pos.x, pos.y);
+                ctx.stroke();
+                // Begin a new path at the same point to prepare for dragging
                 ctx.beginPath();
                 ctx.moveTo(pos.x, pos.y);
             };
@@ -181,7 +194,8 @@ function handleMouseMove(e) {
     }
 
     // If no drag is in progress, terminate the function.
-    if (!state.isDragging) return;
+    // This check is now bypassed for draw/border modes to allow intra-cell drawing.
+    // The mark mode logic below is now gated by the isDragging flag itself.
 
     if (!pos.onGrid) {
         handleMouseUp(e);
@@ -191,10 +205,13 @@ function handleMouseMove(e) {
     if (state.isLeftDown) {
         if (state.activeMode === 'mark') {
             // Marks the cell currently under the mouse cursor during a drag operation.
-            const { row, col } = pos;
-            if (state.playerGrid[row][col] === 0) { // Only places an 'X' on empty cells.
-                if (applyMarkChange(row, col, 0, 2)) {
-                    pushHistory({ type: 'mark', r: row, c: col, from: 0, to: 2 });
+            // This logic is now wrapped in an isDragging check to preserve original behavior.
+            if (state.isDragging) {
+                const { row, col } = pos;
+                if (state.playerGrid[row][col] === 0) { // Only places an 'X' on empty cells.
+                    if (applyMarkChange(row, col, 0, 2)) {
+                        pushHistory({ type: 'mark', r: row, c: col, from: 0, to: 2 });
+                    }
                 }
             }
         } else if (state.activeMode === 'draw') {
