@@ -4,7 +4,7 @@
  * Star Battle Puzzle - Main Application Logic
  *
  * @author Isaiah Tadrous
- * @version 1.8.0
+ * @version 1.8.1
  *
  * -------------------------------------------------------------------------------
  *
@@ -416,6 +416,14 @@ document.addEventListener('DOMContentLoaded', () => {
      */
     function init() {
         populateSizeSelector();
+		
+		// This is a temporary measure to prevent users from accidentally losing their work until backend storage is implemented.
+		window.addEventListener('beforeunload', (e) => {
+			// Prevent the default action to trigger the browser's confirmation dialog.
+			e.preventDefault();
+			// Required for some older browsers.
+			e.returnValue = '';
+		});
 
         // Attach event listeners to main control buttons.
         newPuzzleBtn.addEventListener('click', fetchNewPuzzle);
