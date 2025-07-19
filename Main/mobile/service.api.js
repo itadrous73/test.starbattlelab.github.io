@@ -3,7 +3,7 @@
  * Title: Star Battle API and Data Management
  * **********************************************************************************
  * @author Isaiah Tadrous
- * @version 1.1.4
+ * @version 1.1.5
  * *-------------------------------------------------------------------------------
  * This script manages all asynchronous communication with the backend API for the
  * Star Battle puzzle application. Its responsibilities include fetching new
@@ -51,6 +51,8 @@ async function fetchNewPuzzle() {
         state.sourcePuzzleData = { task: puzzleData.task, stars: puzzleData.stars };
         state.gridDim = dim;
         state.solution = null;
+        state.isViewingSolution = false;
+        gridContainer.classList.remove('solution-mode');
         updateSolutionButtonUI();
         
         // Reset and render the game board
@@ -190,7 +192,8 @@ async function importPuzzleString(importString) {
         state.regionGrid = data.regionGrid;
         state.sourcePuzzleData = { task: data.regionGrid.flat().join(','), stars: data.starsPerRegion };
         state.solution = null;
-        
+        state.isViewingSolution = false;
+        gridContainer.classList.remove('solution-mode');
         clearPuzzleState(); // Clear old state before loading new
 
         // Restore player grid and history from imported data
