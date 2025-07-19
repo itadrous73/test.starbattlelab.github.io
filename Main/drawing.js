@@ -4,7 +4,7 @@
  * Star Battle Puzzle - Drawing and Rendering
  *
  * @author Isaiah Tadrous
- * @version 1.3.1
+ * @version 1.3.2
  *
  * -------------------------------------------------------------------------------
  *
@@ -223,19 +223,36 @@ function updateErrorHighlightingUI() {
  */
 function resizeCanvas() {
     const rect = gridContainer.getBoundingClientRect();
-    drawCanvas.width = rect.width;
-    drawCanvas.height = rect.height;
 
-    state.bufferCanvas.width = rect.width;
-    state.bufferCanvas.height = rect.height;
-    // Get the 2D rendering context for the buffer canvas.
-    state.bufferCtx = state.bufferCanvas.getContext('2d');
-    // If the canvas has valid dimensions, draw its current content onto the buffer.
-    if (drawCanvas.width > 0 && drawCanvas.height > 0) {
-        state.bufferCtx.drawImage(drawCanvas, 0, 0);
+    if (state.bufferCtx) {
+        const tempCanvas = document.createElement('canvas');
+        tempCanvas.width = drawCanvas.width;
+        tempCanvas.height = drawCanvas.height;
+        const tempCtx = tempCanvas.getContext('2d');
+        tempCtx.drawImage(drawCanvas, 0, 0);
+
+        drawCanvas.width = rect.width;
+        drawCanvas.height = rect.height;
+        state.bufferCanvas.width = rect.width;
+        state.bufferCanvas.height = rect.height;
+        state.bufferCtx = state.bufferCanvas.getContext('2d');
+        
+        // Add this line
+        state.bufferCtx.imageSmoothingEnabled = false;
+
+        if (tempCanvas.width > 0 && tempCanvas.height > 0) {
+            state.bufferCtx.drawImage(tempCanvas, 0, 0, rect.width, rect.height);
+        }
+    } else {
+        // Fallback for initial load
+        drawCanvas.width = rect.width;
+        drawCanvas.height = rect.height;
+        state.bufferCanvas.width = rect.width;
+        state.bufferCanvas.height = rect.height;
+        state.bufferCtx = state.bufferCanvas.getContext('2d');
     }
 
-    redrawAllOverlays(); // Redraw all overlays to fit the new canvas size.
+    redrawAllOverlays();
 }
 
 /**
