@@ -8,7 +8,7 @@ This repository contains a web application for playing and creating Star Battle 
 
 You can play the live version instantly in your browser. No setup is needed.
 
-[**LiveDemo**](https://joey-bryant.github.io/StarbattlesTools/Main/index.html)
+[**LiveDemo**](https://starbattlelab.github.io/Main/)
 
 -----
 
