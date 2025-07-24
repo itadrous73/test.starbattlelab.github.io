@@ -4,7 +4,7 @@
  * Star Battle Puzzle - Interactions and State API
  *
  * @author Isaiah Tadrous
- * @version 1.1.2
+ * @version 1.1.3
  *
  * -------------------------------------------------------------------------------
  *
@@ -274,6 +274,7 @@ function handleMouseUp(e) {
                 if (fromState === 0) {
                     if (applyMarkChange(r, c, 0, 2)) {
                         pushHistory({ type: 'mark', r, c, from: 0, to: 2 });
+                        updateUrlWithSbn();
                     }
                 } else if (fromState === 2) {
                     placeStarAndAutoX(r, c);
