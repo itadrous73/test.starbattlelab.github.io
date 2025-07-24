@@ -4,7 +4,7 @@
  * Star Battle Puzzle - Main Application Logic
  *
  * @author Isaiah Tadrous
- * @version 1.8.2
+ * @version 1.8.3
  *
  * -------------------------------------------------------------------------------
  *
@@ -145,6 +145,7 @@ document.addEventListener('DOMContentLoaded', () => {
                     updateSolutionButtonUI();
                     clearPuzzleState();
                     renderGrid();
+                    updateUrlWithSbn();
                 }
             } else {
                 throw new Error('Failed to decode SBN from local file');
@@ -298,6 +299,7 @@ document.addEventListener('DOMContentLoaded', () => {
             updateSolutionButtonUI();
             updateUndoRedoButtons();
             setStatus("Puzzle loaded successfully!", true);
+            updateUrlWithSbn();
             return true;
         } catch (error) {
             console.error("Error importing puzzle:", error);
@@ -467,6 +469,7 @@ document.addEventListener('DOMContentLoaded', () => {
                         _internalClearMarks();
                         renderAllMarks();
                         updateErrorHighlightingUI();
+                        updateUrlWithSbn();
                     }
                     break;
             }
