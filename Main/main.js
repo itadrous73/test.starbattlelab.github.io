@@ -4,7 +4,7 @@
  * Star Battle Puzzle - Main Application Logic
  *
  * @author Isaiah Tadrous
- * @version 1.8.1
+ * @version 1.8.2
  *
  * -------------------------------------------------------------------------------
  *
@@ -654,9 +654,21 @@ document.addEventListener('DOMContentLoaded', () => {
                 }
             }
         });
-
+	    
+	(async () => {
+		const urlParams = new URLSearchParams(window.location.search);
+		const sbnFromUrl = urlParams.get('sbn');
+		if (sbnFromUrl) {
+			// If an SBN string is found, import it.
+			// The importPuzzleString function already handles decoding and rendering.
+			await importPuzzleString(sbnFromUrl);
+		} else {
+			// Otherwise, fetch a new random puzzle as the default action.
+			fetchNewPuzzle();
+		}
+	})();
+	    
         // Initial setup calls.
-        fetchNewPuzzle();
         updateModeUI();
         renderColorPicker();
     }
