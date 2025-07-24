@@ -179,6 +179,7 @@ function removeStarAndAutoX(r, c) {
         }
     }
     updateErrorHighlightingUI(); // Update UI to reflect changes and error highlighting.
+    updateUrlWithSbn();
 }
 
 // --- COLOR PICKER LOGIC ---
