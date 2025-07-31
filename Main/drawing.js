@@ -4,7 +4,7 @@
  * Star Battle Puzzle - Drawing and Rendering
  *
  * @author Isaiah Tadrous
- * @version 1.3.3
+ * @version 2.0.0
  *
  * -------------------------------------------------------------------------------
  *
@@ -23,6 +23,331 @@
 // --- RENDERING & DRAWING FUNCTIONS ---
 
 /**
+ * Converts an HSL color value to RGB.
+ * @param {number} h - Hue.
+ * @param {number} s - Saturation.
+ * @param {number} l - Lightness.
+ * @returns {Array<number>} - The RGB representation [r, g, b].
+ */
+function hslToRgb(h, s, l) {
+    s /= 100;
+    l /= 100;
+    let c = (1 - Math.abs(2 * l - 1)) * s,
+        x = c * (1 - Math.abs((h / 60) % 2 - 1)),
+        m = l - c / 2,
+        r = 0,
+        g = 0,
+        b = 0;
+    if (0 <= h && h < 60) {
+        r = c;
+        g = x;
+        b = 0;
+    } else if (60 <= h && h < 120) {
+        r = x;
+        g = c;
+        b = 0;
+    } else if (120 <= h && h < 180) {
+        r = 0;
+        g = c;
+        b = x;
+    } else if (180 <= h && h < 240) {
+        r = 0;
+        g = x;
+        b = c;
+    } else if (240 <= h && h < 300) {
+        r = x;
+        g = 0;
+        b = c;
+    } else if (300 <= h && h < 360) {
+        r = c;
+        g = 0;
+        b = x;
+    }
+    r = Math.round((r + m) * 255);
+    g = Math.round((g + m) * 255);
+    b = Math.round((b + m) * 255);
+    return [r, g, b];
+}
+
+/**
+ * Converts an RGB color value to the LAB color space.
+ * @param {number} r - Red value.
+ * @param {number} g - Green value.
+ * @param {number} b - Blue value.
+ * @returns {Array<number>} - The LAB representation [l, a, b].
+ */
+function rgbToLab(r, g, b) {
+    r /= 255;
+    g /= 255;
+    b /= 255;
+    r = (r > 0.04045) ? Math.pow((r + 0.055) / 1.055, 2.4) : r / 12.92;
+    g = (g > 0.04045) ? Math.pow((g + 0.055) / 1.055, 2.4) : g / 12.92;
+    b = (b > 0.04045) ? Math.pow((b + 0.055) / 1.055, 2.4) : b / 12.92;
+    let x = (r * 0.4124 + g * 0.3576 + b * 0.1805) / 0.95047;
+    let y = (r * 0.2126 + g * 0.7152 + b * 0.0722) / 1.00000;
+    let z = (r * 0.0193 + g * 0.1192 + b * 0.9505) / 1.08883;
+    x = (x > 0.008856) ? Math.pow(x, 1 / 3) : (7.787 * x) + 16 / 116;
+    y = (y > 0.008856) ? Math.pow(y, 1 / 3) : (7.787 * y) + 16 / 116;
+    z = (z > 0.008856) ? Math.pow(z, 1 / 3) : (7.787 * z) + 16 / 116;
+    return [(116 * y) - 16, 500 * (x - y), 200 * (y - z)];
+}
+
+/**
+ * Calculates the perceptual difference between two LAB colors using the Delta E formula.
+ * @param {Array<number>} labA - The first LAB color [l, a, b].
+ * @param {Array<number>} labB - The second LAB color [l, a, b].
+ * @returns {number} - The calculated color difference.
+ */
+function deltaE(labA, labB) {
+    let deltaL = labA[0] - labB[0];
+    let deltaA = labA[1] - labB[1];
+    let deltaB = labA[2] - labB[2];
+    let c1 = Math.sqrt(labA[1] * labA[1] + labA[2] * labA[2]);
+    let c2 = Math.sqrt(labB[1] * labB[1] + labB[2] * labB[2]);
+    let deltaC = c1 - c2;
+    let deltaH = deltaA * deltaA + deltaB * deltaB - deltaC * deltaC;
+    deltaH = deltaH < 0 ? 0 : Math.sqrt(deltaH);
+    return Math.sqrt(Math.pow(deltaL, 2) + Math.pow(deltaC, 2) + Math.pow(deltaH, 2));
+}
+/**
+ * Analyzes the grid to assign distinct colors to adjacent regions and stores them in state.
+ * This function should be called once when a new puzzle is loaded.
+ * @returns {void}
+ */
+function assignAndStoreRegionColors() {
+    if (!state.gridDim || !state.regionGrid) return;
+
+    // 1. Find all unique regions and their neighbors.
+    const regions = {};
+    for (let r = 0; r < state.gridDim; r++) {
+        for (let c = 0; c < state.gridDim; c++) {
+            const id = state.regionGrid[r][c];
+            if (!regions[id]) {
+                regions[id] = {
+                    id: id,
+                    neighbors: new Set()
+                };
+            }
+
+            // Check right neighbor
+            if (c < state.gridDim - 1 && state.regionGrid[r][c + 1] !== id) {
+                const neighborId = state.regionGrid[r][c + 1];
+                regions[id].neighbors.add(neighborId);
+                if (!regions[neighborId]) { // Ensure neighbor is initialized
+                    regions[neighborId] = {
+                        id: neighborId,
+                        neighbors: new Set()
+                    };
+                }
+                regions[neighborId].neighbors.add(id);
+            }
+
+            // Check bottom neighbor
+            if (r < state.gridDim - 1 && state.regionGrid[r + 1][c] !== id) {
+                const neighborId = state.regionGrid[r + 1][c];
+                regions[id].neighbors.add(neighborId);
+                if (!regions[neighborId]) { // Ensure neighbor is initialized
+                    regions[neighborId] = {
+                        id: neighborId,
+                        neighbors: new Set()
+                    };
+                }
+                regions[neighborId].neighbors.add(id);
+            }
+        }
+    }
+    const regionIds = Object.keys(regions).map(Number);
+
+    // 2. Generate a color palette based on the number of unique regions.
+    // The initial palette, now more diverse and designed for a larger number of regions if needed.
+    const initialColorPalette = Array.from({
+        length: Math.max(regionIds.length * 2, 25)
+    }, (_, i) => { // Ensure enough colors
+        const hue = (i * 67) % 360;
+        const isSaturated = i % 2 === 1;
+        const s = isSaturated ? 65 : 100;
+        const l = isSaturated ? 77 : 90;
+        return {
+            h: hue,
+            s: s,
+            l: l
+        };
+    });
+
+    // A more robust set of fallback colors.
+    const fallbackColors = [{
+            h: 0.0,
+            s: 100,
+            l: 90
+        }, {
+            h: 67.0,
+            s: 65,
+            l: 77
+        }, {
+            h: 134.0,
+            s: 100,
+            l: 90
+        },
+        {
+            h: 201.0,
+            s: 65,
+            l: 77
+        }, {
+            h: 268.0,
+            s: 100,
+            l: 90
+        }, {
+            h: 335.0,
+            s: 65,
+            l: 77
+        },
+        {
+            h: 42.0,
+            s: 100,
+            l: 90
+        }, {
+            h: 109.0,
+            s: 65,
+            l: 77
+        }, {
+            h: 176.0,
+            s: 100,
+            l: 90
+        },
+        {
+            h: 275.0,
+            s: 73,
+            l: 78
+        }, {
+            h: 243.0,
+            s: 65,
+            l: 77
+        }, {
+            h: 275.0,
+            s: 30,
+            l: 60
+        },
+        {
+            h: 190.0,
+            s: 100,
+            l: 50
+        }, {
+            h: 195.0,
+            s: 100,
+            l: 76
+        }, {
+            h: 0.0,
+            s: 9,
+            l: 60
+        },
+        {
+            h: 137.5,
+            s: 43,
+            l: 77
+        }, {
+            h: 176.0,
+            s: 32,
+            l: 50
+        }, {
+            h: 190.0,
+            s: 80,
+            l: 32
+        },
+        {
+            h: 0.0,
+            s: 10,
+            l: 50
+        }, {
+            h: 52.5,
+            s: 27,
+            l: 50
+        }, {
+            h: 52.5,
+            s: 77,
+            l: 50
+        }
+    ];
+
+    // 3. Assign colors to regions using the smart placement logic.
+    const regionColorMap = {};
+    const assignedColors = {}; // Stores LAB values for quick lookup
+    const availablePalette = [...initialColorPalette]; // Use a mutable copy of the palette
+
+    for (const regionId of regionIds) {
+        let placed = false;
+        // Start with a high threshold and decrease it until a color can be placed.
+        for (let threshold = 35; threshold >= 0 && !placed; threshold -= 3) {
+
+            // Fallback if primary palette doesn't yield a valid color or threshold is very low
+            if (!placed && threshold < 20) { // Only try fallback colors at low thresholds
+                let assignedFallback = false;
+                for (const fbColor of fallbackColors) { // Iterate through fallback colors
+                    let isValidFallback = true;
+                    const labFb = rgbToLab(...hslToRgb(fbColor.h, fbColor.s, fbColor.l));
+                    const neighbors = regions[regionId].neighbors;
+
+                    for (const neighborId of neighbors) {
+                        if (assignedColors[neighborId]) {
+                            if (deltaE(labFb, assignedColors[neighborId]) < threshold) {
+                                isValidFallback = false;
+                                break;
+                            }
+                        }
+                    }
+
+                    if (isValidFallback) {
+                        regionColorMap[regionId] = fbColor;
+                        assignedColors[regionId] = labFb;
+                        placed = true;
+                        assignedFallback = true;
+                        break;
+                    }
+                }
+
+                if (!assignedFallback) {
+                    // If no fallback color works even with low threshold, use the hardcoded gray
+                    regionColorMap[regionId] = {
+                        h: 100,
+                        s: 0,
+                        l: 70
+                    };
+                    assignedColors[regionId] = rgbToLab(117, 117, 117);
+                    placed = true;
+                }
+            }
+
+            // Primary attempt: Use colors from the main palette
+            for (let i = 0; i < availablePalette.length; i++) {
+                const candidateColor = availablePalette[i];
+                let isValid = true;
+
+                const neighbors = regions[regionId].neighbors;
+                for (const neighborId of neighbors) {
+                    if (assignedColors[neighborId]) {
+                        const lab1 = rgbToLab(...hslToRgb(candidateColor.h, candidateColor.s, candidateColor.l));
+                        const lab2 = assignedColors[neighborId];
+                        if (deltaE(lab1, lab2) < threshold) {
+                            isValid = false;
+                            break;
+                        }
+                    }
+                }
+
+                if (isValid) {
+                    regionColorMap[regionId] = candidateColor;
+                    assignedColors[regionId] = rgbToLab(...hslToRgb(candidateColor.h, candidateColor.s, candidateColor.l));
+                    availablePalette.splice(i, 1); // Remove color from palette to ensure uniqueness among direct neighbors
+                    placed = true;
+                    break;
+                }
+            }
+        }
+    }
+
+    // 4. Store the final map in the global state.
+    state.regionColorMap = regionColorMap;
+}
+/**
  * Renders the main puzzle grid based on the current `state.regionGrid` and `state.gridDim`.
  * This function creates the cell elements, applies region coloring (or black/white mode),
  * draws region borders, and updates the marks (stars/X's) within each cell.
@@ -32,6 +357,10 @@
 function renderGrid() {
     gridContainer.innerHTML = ''; // Clear existing grid cells.
     if (!state.gridDim || !state.regionGrid || state.regionGrid.length === 0) return;
+
+    // Pre-calculate the color assignments for the regions.
+    assignAndStoreRegionColors();
+    // --------------------
 
     // Toggle a CSS class to switch between colored and black & white mode for regions.
     gridContainer.classList.toggle('bw-mode', state.isBwMode);
@@ -51,11 +380,12 @@ function renderGrid() {
             // Apply background color based on region ID if not in black & white mode.
             if (!state.isBwMode) {
                 const regionId = state.regionGrid[r][c];
-                const hue = (regionId * 67) % 360; // Calculate hue for distinct region colors.
-                const isSaturated = regionId % 2 === 1; // Alternate saturation for visual variety.
-                const sat = isSaturated ? 65 : 100;
-                const light = isSaturated ? 77 : 90;
-                cell.style.backgroundColor = `hsl(${hue}, ${sat}%, ${light}%)`;
+                if (state.regionColorMap && state.regionColorMap[regionId]) {
+                    const color = state.regionColorMap[regionId];
+                    cell.style.backgroundColor = `hsl(${color.h}, ${color.s}%, ${color.l}%)`;
+                }
+                // ----------------
+
             }
 
             // Add CSS classes for region borders based on adjacent cell region IDs.
