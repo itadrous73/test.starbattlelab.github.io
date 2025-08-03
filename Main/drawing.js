@@ -559,7 +559,7 @@ function resizeCanvas() {
         tempCanvas.width = drawCanvas.width;
         tempCanvas.height = drawCanvas.height;
         const tempCtx = tempCanvas.getContext('2d');
-        tempCtx.drawImage(drawCanvas, 0, 0);
+        tempCtx.drawImage(state.bufferCanvas, 0, 0);
 
         drawCanvas.width = rect.width;
         drawCanvas.height = rect.height;
