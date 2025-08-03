@@ -4,7 +4,7 @@
  * Star Battle Puzzle - Main Application Logic
  *
  * @author Isaiah Tadrous
- * @version 1.9.0
+ * @version 1.9.1
  *
  * -------------------------------------------------------------------------------
  *
@@ -440,6 +440,16 @@ document.addEventListener('DOMContentLoaded', () => {
         undoBtn.addEventListener('click', undo);
         redoBtn.addEventListener('click', redo);
 
+	// --- Event listener for closing modals by clicking outside ---
+	[loadModal, settingsModal].forEach(modal => {
+	    modal.addEventListener('click', (e) => {
+	        // If the clicked element is the modal container itself (the background)
+	        if (e.target === modal) {
+	            modal.classList.add('hidden'); // Hide the modal
+	        }
+	    });
+	});
+	    
         // Clear button functionality based on active mode.
         clearBtn.addEventListener('click', () => {
             let action = {
