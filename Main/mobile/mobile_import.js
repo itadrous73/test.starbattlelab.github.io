@@ -1,8 +1,8 @@
 /**
  * @file mobile_import.js
- * @version 1.0.0
+ * @version 1.0.1
  * @description Provides the user interface and logic for importing Star Battle puzzles. Supports manual drawing, photo import (SnapGrid), and string-based input.
- * @date August 13, 2025
+ * @date August 18, 2025
  */
 
 /**
@@ -218,6 +218,9 @@ const customCss = `
       h1, h2 {
         font-size: 1.5rem !important; /* Reduce heading sizes */
       }
+	  .text-5xl {
+		font-size: 3rem !important;
+	  }
       #puzzleStringInput {
         font-size: 1rem !important; /* Adjust text area font size */
       }
@@ -808,23 +811,36 @@ const customCss = `
 				GridManager.setTool(newTool);
 			});
 
-			// Grid drawing listeners for both mouse and touch.
-			const mouseMoveHandler = e => GridManager.paint(e);
-			this.gridContainer.addEventListener("mousedown", e => {
-				GridManager.startPainting(e);
-				document.addEventListener("mousemove", mouseMoveHandler);
-			});
-			document.addEventListener("mouseup", () => {
-				GridManager.stopPainting();
-				document.removeEventListener("mousemove", mouseMoveHandler);
-			});
-			this.gridContainer.addEventListener("touchstart", e => GridManager.startPainting(e), {
-				passive: false
-			});
-			this.gridContainer.addEventListener("touchmove", e => GridManager.paint(e), {
-				passive: false
-			});
-			this.gridContainer.addEventListener("touchend", () => GridManager.stopPainting());
+		const mouseMoveHandler = e => GridManager.paint(e);
+		
+		const mouseUpHandler = () => {
+		    GridManager.stopPainting();
+		    // Clean up the listeners from the document
+		    document.removeEventListener('mousemove', mouseMoveHandler);
+		    document.removeEventListener('mouseup', mouseUpHandler);
+		};
+		
+		this.gridContainer.addEventListener("mousedown", e => {
+		    GridManager.startPainting(e);
+		    // Add global listeners ONLY when a drag starts inside the modal grid
+		    document.addEventListener('mousemove', mouseMoveHandler);
+		    document.addEventListener('mouseup', mouseUpHandler);
+		});
+		
+		// Also add touch support using the same pattern
+		const touchMoveHandler = e => GridManager.paint(e);
+		
+		const touchEndHandler = () => {
+		    GridManager.stopPainting();
+		    document.removeEventListener('touchmove', touchMoveHandler);
+		    document.removeEventListener('touchend', touchEndHandler);
+		};
+		
+		this.gridContainer.addEventListener("touchstart", e => {
+		    GridManager.startPainting(e);
+		    document.addEventListener('touchmove', touchMoveHandler);
+		    document.addEventListener('touchend', touchEndHandler);
+		}, { passive: false });
 		},
 
 		/**
@@ -1204,4 +1220,5 @@ const customCss = `
 	};
 	// Initialize the Uploader, which sets up all UI elements and event listeners.
 	Uploader.init();
+
 }
