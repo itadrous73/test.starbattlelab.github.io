@@ -169,7 +169,7 @@ let preActionState = null;
 
 
 // --- ADDED: SBN AND PUZZLE CONSTANTS ---
-const PUZZLES_DIRECTORY_PATH = 'puzzles/files/';
+const PUZZLES_DIRECTORY_PATH = 'puzzles/Files/';
 const STATE_EMPTY = 0;
 const STATE_STAR = 1;
 const STATE_SECONDARY_MARK = 2;
@@ -182,5 +182,6 @@ const SBN_CODE_TO_DIM_MAP = {
     'NN': 23, 'OO': 24, 'PP': 25
 };
 const DIM_TO_SBN_CODE_MAP = Object.fromEntries(Object.entries(SBN_CODE_TO_DIM_MAP).map(([k, v]) => [v, k]));
+
 
 
