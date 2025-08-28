@@ -142,7 +142,7 @@ const API_BASE_URL = 'http://127.0.0.1:5001/api';
  */
 const LOCAL_STORAGE_KEY = 'starBattleSaves';
 
-const PUZZLES_DIRECTORY_PATH = 'puzzles/files/';
+const PUZZLES_DIRECTORY_PATH = 'puzzles/Files/';
 
 const STATE_EMPTY = 0;
 const STATE_STAR = 1;
@@ -237,6 +237,7 @@ state.currentColor = PRESET_COLORS[0];
  * operations or a deep copy of the `customBorders` array.
  */
 let preActionState = null; // Used to store state before an action begins
+
 
 
 
