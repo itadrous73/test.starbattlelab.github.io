@@ -58,8 +58,6 @@ const ALL_ASSETS = [
     'SnapGridScripts/speedinvert.js',
 
     // --- Puzzle Files (Hardcoded based on actual puzzleDefs) ---
-    // NOTE: This assumes a 'puzzles' folder exists inside 'mobile'. 
-    // If not, you may need to adjust or remove these lines.
     'puzzles/Files/5-1-unsorted.txt',
     'puzzles/Files/6-1-unsorted.txt',
     'puzzles/Files/8-1-ez.txt',
