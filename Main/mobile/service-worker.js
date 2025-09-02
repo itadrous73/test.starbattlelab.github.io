@@ -3,13 +3,13 @@
  * Title: Star Battle Service Worker
  * **********************************************************************************
  * @author Isaiah Tadrous
- * @version 1.1.0
+ * @version 1.0.2
  * *-------------------------------------------------------------------------------
  * This service worker script is responsible for caching the application's assets
  * to enable offline functionality and improve loading performance. It uses a
- * "cache-first" caching strategy, which ensures that the user gets the fastest
- * possible loading experience by serving cached content immediately when available.
- * When a resource is not in the cache, it fetches from the network. The script
+ * "network-first" caching strategy, which ensures that the user always gets the
+ * most up-to-date content when they are online, but still allows the application
+ * to be accessible offline by serving cached content as a fallback. The script
  * also includes logic to handle the activation of a new service worker version,
  * ensuring a smooth update process for the user.
  * **********************************************************************************
@@ -17,7 +17,7 @@
 
 // --- SERVICE WORKER CONFIGURATION ---
 
-const CACHE_NAME = 'star-battle-cache-v4';
+const CACHE_NAME = 'star-battle-cache-v7';
 
 // --- COMPLETE LIST OF ASSETS TO CACHE FOR OFFLINE USE ---
 const ALL_ASSETS = [
@@ -126,32 +126,16 @@ self.addEventListener('activate', event => {
 
 /**
  * @description The 'fetch' event is fired for every request the page makes.
- * This implementation uses a "cache-first" strategy. It checks the cache first
- * for the requested resource. If found in the cache, it serves the cached version
- * immediately for maximum performance. If not found in cache, it fetches from
- * the network and optionally caches the response for future use.
+ * This implementation uses a "network-first" strategy. It tries to fetch the
+ * resource from the network first. If that fails (e.g., the user is offline),
+ * it falls back to serving the resource from the cache.
  */
 self.addEventListener('fetch', event => {
     event.respondWith(
-        caches.match(event.request).then(response => {
-            // If the request is in the cache, return the cached response immediately.
-            // Otherwise, try to fetch it from the network.
-            return response || fetch(event.request).then(fetchResponse => {
-                // Optionally cache the network response for future requests
-                // Only cache GET requests and successful responses
-                if (event.request.method === 'GET' && fetchResponse.status === 200) {
-                    const responseToCache = fetchResponse.clone();
-                    caches.open(CACHE_NAME).then(cache => {
-                        cache.put(event.request, responseToCache);
-                    });
-                }
-                return fetchResponse;
-            }).catch(() => {
-                // If both cache and network fail, return a generic offline response
-                return new Response("Content not available offline.", { 
-                    status: 404, 
-                    statusText: "Offline" 
-                });
+        fetch(event.request).catch(() => {
+            return caches.match(event.request).then(response => {
+                // If the request is in the cache, return it. Otherwise, return a generic offline response.
+                return response || new Response("Content not available offline.", { status: 404, statusText: "Offline" });
             });
         })
     );
