@@ -3,7 +3,7 @@
  * Title: PWA Management and Update Notification System
  * **********************************************************************************
  * @author Isaiah Tadrous
- * @version 1.1.0
+ * @version 1.2.0
  * *-------------------------------------------------------------------------------
  * This script handles the registration of the service worker, manages the PWA
  * update lifecycle, and provides a custom install prompt experience. It detects
