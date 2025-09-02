@@ -1,11 +1,11 @@
 {
     "name": "StarBattle.org",
     "short_name": "StarBattles",
-    "start_url": "/index.html",
-    "display": "standalone",
+    "start_url": "index.html",
+    "display": "fullscreen",
     "background_color": "#374151",
     "theme_color": "#1F2937",
-    "description": "StarBattle.org Playground!",
+    "description": "Starbattle.org Playground!",
     "icons": [
         {
             "src": "icons/icon-192x192.png",
