@@ -1,7 +1,7 @@
 {
   "name": "StarBattle.org",
   "short_name": "StarBattle",
-  "start_url": "index.html",
+  "start_url": "../index.html",
   "display": "fullscreen",
   "orientation": "portrait",
   "background_color": "#1F2937",
