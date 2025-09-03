@@ -12,8 +12,8 @@
  */
 
 // Platform detection to ensure this script ONLY runs for Apple users on Safari.
-const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent);
-const isSafariOnIOS = isIOS && /Safari/.test(navigator.userAgent) && !/CriOS|FxiOS|GSA/.test(navigator.userAgent);
+const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent) && !window.MSStream;
+const isSafariOnIOS = isIOS && navigator.vendor && navigator.vendor.indexOf('Apple') > -1 && !navigator.userAgent.match('CriOS');
 
 // Only execute the script's logic if the user is on Safari on an iOS device.
 if (isSafariOnIOS) {
