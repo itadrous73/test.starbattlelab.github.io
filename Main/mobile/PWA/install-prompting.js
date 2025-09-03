@@ -246,58 +246,84 @@ if (isSafariOnIOS) {
     }
 
     /**
-     * Show manual installation instructions for iOS Safari
+     * Show manual installation instructions inside an isolated overlay
      */
     function showInstallInstructions() {
+        // 1. Create the full-screen overlay
+        const overlayDiv = document.createElement('div');
+        overlayDiv.id = 'pwa-install-overlay';
+        overlayDiv.style.cssText = `
+            position: fixed;
+            inset: 0; /* Modern shorthand for top:0, left:0, bottom:0, right:0 */
+            background-color: rgba(0, 0, 0, 0.6);
+            z-index: 1003;
+            display: flex; /* Use Flexbox to center the modal */
+            align-items: center;
+            justify-content: center;
+            padding: 16px; /* Add padding to prevent modal from touching screen edges */
+        `;
+    
+        // 2. Create the instructions modal itself (now much simpler)
         const instructionsDiv = document.createElement('div');
         instructionsDiv.style.cssText = `
-            position: fixed;
-            top: 50%;
-            left: 50%;
-            transform: translate(-50%, -50%);
-            background: #1f2937;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
             color: white;
-            padding: 30px;
+            padding: 20px;
             border-radius: 12px;
-            box-shadow: 0 20px 60px rgba(0,0,0,0.5);
-            z-index: 1003;
-            /* Targeted changes for width and centering */
-            max-width: 400px; /* Set a maximum width */
-            width: calc(100% - 60px); /* Fill available width minus padding */
-            text-align: center;
+            box-shadow: 0 10px 40px rgba(0,0,0,0.4);
+            width: 100%;
+            max-width: 400px; /* Set the max width of the modal */
         `;
-
-        // Since this script only runs on iOS Safari, we only need one set of instructions.
-        const instructions = `
-            <h3 style="margin-bottom: 20px;">Install on this Device</h3>
-            <ol style="text-align: left; line-height: 1.6;">
-                <li>Tap the Share button <svg width='18' height='18' viewBox='0 0 24 24' fill='none' stroke='currentColor' stroke-width='2.5' stroke-linecap='round' stroke-linejoin='round' style='display: inline-block; vertical-align: text-bottom; margin-bottom: -3px;'><path d='M4 12v8a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-8'></path><polyline points='16 6 12 2 8 6'></polyline><line x1='12' y1='2' x2='12' y2='15'></line></svg></li>
-                <li>Scroll down and tap "Add to Home Screen"</li>
-                <li>Tap "Add" to confirm</li>
-            </ol>
-        `;
-
+    
+        // --- Instructions HTML updated to match prompt style ---
         instructionsDiv.innerHTML = `
-            ${instructions}
+            <div style="display: flex; align-items: center; gap: 15px; margin-bottom: 15px;">
+                <div style="flex-shrink: 0;">
+                    <svg xmlns='http://www.w3.org/2000/svg' width='40' height='40' viewBox='0 0 24 24' fill='none' stroke='white' stroke-width='1.5' stroke-linecap='round' stroke-linejoin='round'><path d='M4 12v8a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-8'></path><polyline points='16 6 12 2 8 6'></polyline><line x1='12' y1='2' x2='12' y2='15'></line></svg>
+                </div>
+                <div style="flex: 1; text-align: left;">
+                    <div style="font-weight: 600; margin-bottom: 5px;">Install on this Device</div>
+                    <div style="font-size: 0.9rem; opacity: 0.9;">Follow these steps:</div>
+                </div>
+            </div>
+            <ol style="text-align: left; line-height: 1.8; padding-left: 20px; font-size: 0.95rem; margin: 0;">
+                <li>Tap the <strong>Share</strong> button</li>
+                <li>Scroll down and tap <strong>Add to Home Screen</strong></li>
+                <li>Tap <strong>Add</strong> to confirm</li>
+            </ol>
             <button id="instructions-close" style="
                 margin-top: 20px;
-                background: #3b82f6;
+                width: 100%;
+                background: rgba(255,255,255,0.2);
+                border: 1px solid rgba(255,255,255,0.3);
                 color: white;
-                border: none;
                 padding: 10px 20px;
                 border-radius: 6px;
                 cursor: pointer;
                 font-weight: 600;
-            ">Got it!</button>
+            ">Done</button>
         `;
-
-        document.body.appendChild(instructionsDiv);
-
+    
+        // 3. Add the modal to the overlay, and the overlay to the page
+        overlayDiv.appendChild(instructionsDiv);
+        document.body.appendChild(overlayDiv);
+    
+        // 4. Set up the close button to remove the entire overlay
         document.getElementById('instructions-close').addEventListener('click', () => {
-            instructionsDiv.remove();
+            overlayDiv.remove();
+        });
+    
+        // --- Allow closing by clicking the overlay background ---
+        overlayDiv.addEventListener('click', () => {
+            overlayDiv.remove();
+        });
+    
+        // Prevent clicks *inside* the modal from closing it
+        instructionsDiv.addEventListener('click', (e) => {
+            e.stopPropagation();
         });
     }
-
+    
     /**
      * Save prompt data to localStorage
      */
