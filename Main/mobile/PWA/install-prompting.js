@@ -23,44 +23,23 @@ if (isSafariOnIOS) {
     // Configuration for installation prompting
     const PROMPT_CONFIG = {
         // Show prompt after user has been on site for X milliseconds
-        minTimeOnSite: 0, // 0 seconds for instant prompt
+        minTimeOnSite: 1, // 1 seconds for instant prompt
 
         // Show prompt after user has visited X pages/interactions
-        minInteractions: 0,
-
-        // Days to wait before showing prompt again if dismissed
-        dismissCooldown: .02,
-
-        // Key for localStorage
-        storageKey: 'pwa_install_prompt_data'
+        minInteractions: 0
     };
 
     // Tracking variables
     let userInteractions = 0;
-    let timeOnSite = 0;
+    let timeOnSite = 1;
     let promptShown = false;
-    let installPromptData = {
-        lastDismissed: null,
-        timesShown: 0,
-        installed: false
-    };
 
     /**
      * Initialize installation prompting system
      */
     function initializeInstallPrompting() {
-        // Load previous data from localStorage (if available)
-        try {
-            const stored = localStorage.getItem(PROMPT_CONFIG.storageKey);
-            if (stored) {
-                installPromptData = JSON.parse(stored);
-            }
-        } catch (e) {
-            console.log('localStorage not available, using session-only tracking');
-        }
-
         // Don't prompt if already installed
-        if (installPromptData.installed || ('standalone' in window.navigator && window.navigator.standalone)) {
+        if ('standalone' in window.navigator && window.navigator.standalone) {
             return;
         }
 
@@ -117,14 +96,6 @@ if (isSafariOnIOS) {
     function checkAndShowInstallPrompt() {
         // Don't show if already shown this session
         if (promptShown) return;
-
-        // Don't show if recently dismissed
-        if (installPromptData.lastDismissed) {
-            const daysSinceDismissed = (Date.now() - installPromptData.lastDismissed) / (1000 * 60 * 60 * 24);
-            if (daysSinceDismissed < PROMPT_CONFIG.dismissCooldown) {
-                return;
-            }
-        }
 
         // Check engagement criteria
         const hasEnoughTime = timeOnSite >= PROMPT_CONFIG.minTimeOnSite;
@@ -256,21 +227,8 @@ if (isSafariOnIOS) {
         });
 
         document.getElementById('custom-install-dismiss').addEventListener('click', () => {
-            handleCustomInstallDismiss();
             promptDiv.remove();
         });
-
-        // Track that we showed the prompt
-        installPromptData.timesShown++;
-        savePromptData();
-    }
-
-    /**
-     * Handle when user dismisses install prompt
-     */
-    function handleCustomInstallDismiss() {
-        installPromptData.lastDismissed = Date.now();
-        savePromptData();
     }
 
     /**
@@ -391,17 +349,6 @@ if (isSafariOnIOS) {
         document.head.appendChild(fadeStyle);
     }
 
-    /**
-     * Save prompt data to localStorage
-     */
-    function savePromptData() {
-        try {
-            localStorage.setItem(PROMPT_CONFIG.storageKey, JSON.stringify(installPromptData));
-        } catch (e) {
-            // localStorage not available, continue with session-only tracking
-        }
-    }
-
     // Initialize the enhanced prompting system when the page loads
     document.addEventListener('DOMContentLoaded', () => {
         initializeInstallPrompting();
@@ -412,7 +359,6 @@ if (isSafariOnIOS) {
         checkAndShowInstallPrompt,
         showCustomInstallPrompt,
         showInstallInstructions,
-        getPromptData: () => installPromptData,
         getUserEngagement: () => ({
             interactions: userInteractions,
             timeOnSite
