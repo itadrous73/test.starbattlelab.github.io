@@ -3,7 +3,7 @@
  * Title: Enhanced PWA Installation Prompting System (for iOS Safari)
  * **********************************************************************************
  * @author Isaiah Tadrous
- * @version 1.3.0
+ * @version 1.3.1
  * *-------------------------------------------------------------------------------
  * This script provides an enhanced installation prompting system for Progressive
  * Web Apps, specifically targeting Apple users on the Safari browser. It tracks
@@ -149,7 +149,7 @@ if (isSafariOnIOS) {
             bottom: 20px;
             left: 50%;
             transform: translateX(-50%);
-            background: linear-gradient(135deg, #0976ea 0%, #0d47a1 100%);
+            background: linear-gradient(135deg, #095ceb 0%, #0d47a1 100%);
             color: white;
             padding: 20px;
             border-radius: 12px;
@@ -159,9 +159,24 @@ if (isSafariOnIOS) {
             max-width: min(550px, calc(100vw - 40px));
             width: auto;
             min-width: 350px;
+            position: relative; /* Needed for absolute positioning of close button */
         `;
 
         promptDiv.innerHTML = `
+            <button id="custom-install-close-x" style="
+                position: absolute;
+                top: 10px;
+                right: 10px;
+                background: none;
+                border: none;
+                color: white;
+                font-size: 1.2rem;
+                cursor: pointer;
+                padding: 5px;
+                line-height: 1;
+                transition: transform 0.2s ease-out;
+                z-index: 1000;
+            ">&#x2715;</button>
             <div style="display: flex; align-items: center; gap: 15px;">
                 <div style="flex-shrink: 0;">
                     <svg xmlns='http://www.w3.org/2000/svg' width='40' height='40' viewBox='0 0 24 24' fill='none' stroke='white' stroke-width='1.5' stroke-linecap='round' stroke-linejoin='round'><path d='M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4'></path><polyline points='7 10 12 15 17 10'></polyline><line x1='12' y1='15' x2='12' y2='3'></line></svg>
@@ -214,13 +229,12 @@ if (isSafariOnIOS) {
                     /* Ensure it doesn't interfere with other modals */
                     contain: layout style paint;
                 }
-                #custom-install-accept:hover {
+                #custom-install-accept:hover, #custom-install-dismiss:hover, #safari-prompt-dismiss:hover {
                     background: rgba(255,255,255,0.3) !important;
                     transform: translateY(-1px);
                 }
-                #custom-install-dismiss:hover {
-                    background: rgba(255,255,255,0.1) !important;
-                    transform: translateY(-1px);
+                #custom-install-close-x:hover, #instructions-close-x:hover {
+                    transform: rotate(90deg) scale(1.1);
                 }
                 /* Media query for very small screens */
                 @media (max-width: 360px) {
@@ -256,6 +270,11 @@ if (isSafariOnIOS) {
         });
 
         document.getElementById('custom-install-dismiss').addEventListener('click', () => {
+            handleCustomInstallDismiss();
+            promptDiv.remove();
+        });
+
+        document.getElementById('custom-install-close-x').addEventListener('click', () => {
             handleCustomInstallDismiss();
             promptDiv.remove();
         });
@@ -296,7 +315,7 @@ if (isSafariOnIOS) {
         // Create the instructions modal
         const instructionsDiv = document.createElement('div');
         instructionsDiv.style.cssText = `
-            background: linear-gradient(135deg, #0976ea 0%, #0d47a1 100%);
+            background: linear-gradient(135deg, #095ceb 0%, #0d47a1 100%);
             color: white;
             padding: 24px;
             border-radius: 16px;
@@ -304,9 +323,24 @@ if (isSafariOnIOS) {
             width: 100%;
             max-width: 550px;
             animation: modalFadeIn 0.3s ease-out;
+            position: relative; /* Needed for absolute positioning of close button */
         `;
 
         instructionsDiv.innerHTML = `
+            <button id="instructions-close-x" style="
+                position: absolute;
+                top: 10px;
+                right: 10px;
+                background: none;
+                border: none;
+                color: white;
+                font-size: 1.2rem;
+                cursor: pointer;
+                padding: 5px;
+                line-height: 1;
+                transition: transform 0.2s ease-out;
+                z-index: 1000;
+            ">&#x2715;</button>
             <div style="display: flex; align-items: center; gap: 15px; margin-bottom: 20px;">
                 <div style="flex-shrink: 0;">
                     <svg xmlns='http://www.w3.org/2000/svg' width='40' height='40' viewBox='0 0 24 24' fill='none' stroke='white' stroke-width='1.5' stroke-linecap='round' stroke-linejoin='round'><path d='M4 12v8a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-8'></path><polyline points='16 6 12 2 8 6'></polyline><line x1='12' y1='2' x2='12' y2='15'></line></svg>
@@ -362,8 +396,15 @@ if (isSafariOnIOS) {
         overlayDiv.appendChild(instructionsDiv);
         document.body.appendChild(overlayDiv);
 
-        // Set up the close button
+        // Set up the close buttons
         document.getElementById('instructions-close').addEventListener('click', () => {
+            overlayDiv.style.animation = 'fadeOut 0.2s ease-in forwards';
+            setTimeout(() => {
+                overlayDiv.remove();
+            }, 200);
+        });
+
+        document.getElementById('instructions-close-x').addEventListener('click', () => {
             overlayDiv.style.animation = 'fadeOut 0.2s ease-in forwards';
             setTimeout(() => {
                 overlayDiv.remove();
