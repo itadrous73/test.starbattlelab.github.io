@@ -3,7 +3,7 @@
  * Title: Enhanced PWA Installation Prompting System (for iOS Safari)
  * **********************************************************************************
  * @author Isaiah Tadrous
- * @version 1.2.1 - Fixed positioning and iOS detection
+ * @version 1.2.1 
  * *-------------------------------------------------------------------------------
  * This script provides an enhanced installation prompting system for Progressive
  * Web Apps, specifically targeting Apple users on the Safari browser. It tracks
@@ -223,12 +223,13 @@ if (isSafariOnIOS) {
                 }
                 /* Media query for very small screens */
                 @media (max-width: 360px) {
-                    #custom-install-prompt {
+                    #custom-install-prompt, #safari-required-prompt {
                         max-width: calc(100vw - 20px) !important;
                         min-width: unset !important;
                         left: 10px !important;
                         right: 10px !important;
                         transform: none !important;
+                        width: calc(100vw - 20px) !important;
                     }
                     @keyframes slideInUp {
                         from {
@@ -315,7 +316,7 @@ if (isSafariOnIOS) {
                 </div>
             </div>
             <ol style="text-align: left; line-height: 1.8; padding-left: 20px; font-size: 0.95rem; margin: 0 0 20px 0;">
-                <li style="margin-bottom: 8px;">Tap the <strong>Share</strong> button <span style="opacity: 0.7;">(usually at the bottom of Safari)</span></li>
+                <li style="margin-bottom: 8px;">Tap the <strong>Share</strong> button <span style="opacity: 0.7;">(at the bottom, in the center)</span></li>
                 <li style="margin-bottom: 8px;">Scroll down and tap <strong>"Add to Home Screen"</strong></li>
                 <li>Tap <strong>"Add"</strong> to confirm installation</li>
             </ol>
@@ -514,5 +515,3 @@ if (isSafariOnIOS) {
         });
     });
 }
-
-// End of the script
