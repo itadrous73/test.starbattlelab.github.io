@@ -155,7 +155,7 @@ if (isSafariOnIOS) {
             box-shadow: 0 8px 32px rgba(0,0,0,0.3);
             z-index: 9999;
             animation: slideInUp 0.4s ease-out;
-            max-width: min(400px, calc(100vw - 40px));
+            max-width: min(400px, calc(100vw - 10px));
             width: auto;
             min-width: 300px;
         `;
@@ -166,7 +166,7 @@ if (isSafariOnIOS) {
                     <svg xmlns='http://www.w3.org/2000/svg' width='40' height='40' viewBox='0 0 24 24' fill='none' stroke='white' stroke-width='1.5' stroke-linecap='round' stroke-linejoin='round'><path d='M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4'></path><polyline points='7 10 12 15 17 10'></polyline><line x1='12' y1='15' x2='12' y2='3'></line></svg>
                 </div>
                 <div style="flex: 1;">
-                    <div style="font-weight: 600; margin-bottom: 5px;">Install StarBattle App</div>
+                    <div style="font-weight: 600; margin-bottom: 5px;">Install The StarBattle App</div>
                     <div style="font-size: 0.9rem; opacity: 0.9;">Get instant access and play offline!</div>
                 </div>
             </div>
