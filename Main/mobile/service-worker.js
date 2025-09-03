@@ -3,7 +3,7 @@
  * Title: Star Battle Service Worker
  * **********************************************************************************
  * @author Isaiah Tadrous
- * @version 1.0.2
+ * @version 1.0.3
  * *-------------------------------------------------------------------------------
  * This service worker script is responsible for caching the application's assets
  * to enable offline functionality and improve loading performance. It uses a
