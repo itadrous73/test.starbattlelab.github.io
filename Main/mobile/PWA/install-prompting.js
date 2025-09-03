@@ -152,9 +152,12 @@ if (isSafariOnIOS) {
             box-shadow: 0 8px 32px rgba(0,0,0,0.3);
             z-index: 1002;
             animation: slideInUp 0.4s ease-out;
-            width: 80vw;
-            left: 50%;
-            transform: translateX(-50%);
+            /* Targeted changes for width and centering */
+            max-width: 400px; /* Set a maximum width */
+            width: calc(100% - 40px); /* Fill available width minus padding */
+            left: 0;
+            right: 0;
+            margin: auto; /* Center horizontally */
         `;
 
         promptDiv.innerHTML = `
@@ -258,8 +261,9 @@ if (isSafariOnIOS) {
             border-radius: 12px;
             box-shadow: 0 20px 60px rgba(0,0,0,0.5);
             z-index: 1003;
-            max-width: 90vw;
-            width: 400px;
+            /* Targeted changes for width and centering */
+            max-width: 400px; /* Set a maximum width */
+            width: calc(100% - 60px); /* Fill available width minus padding */
             text-align: center;
         `;
 
