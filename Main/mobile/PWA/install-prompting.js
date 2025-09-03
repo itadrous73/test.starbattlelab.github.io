@@ -3,7 +3,7 @@
  * Title: Enhanced PWA Installation Prompting System
  * **********************************************************************************
  * @author Isaiah Tadrous
- * @version 1.0.0
+ * @version 1.1.0
  * *-------------------------------------------------------------------------------
  * This script provides an enhanced installation prompting system for Progressive
  * Web Apps. It intelligently tracks user engagement and presents installation
@@ -275,78 +275,91 @@ function handleCustomInstallDismiss() {
  * Show manual installation instructions
  */
 function showInstallInstructions() {
-   const instructionsDiv = document.createElement('div');
-   instructionsDiv.style.cssText = `
-       position: fixed;
-       top: 50%;
-       left: 50%;
-       transform: translate(-50%, -50%);
-       background: #1f2937;
-       color: white;
-       padding: 30px;
-       border-radius: 12px;
-       box-shadow: 0 20px 60px rgba(0,0,0,0.5);
-       z-index: 1003;
-       max-width: 90vw;
-       width: 400px;
-       text-align: center;
-   `;
-   
-   // Detect browser and OS for specific instructions
-   const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent);
-   const isAndroid = /Android/.test(navigator.userAgent);
-   const isSafari = /Safari/.test(navigator.userAgent) && !/Chrome/.test(navigator.userAgent);
-   
-   let instructions = '';
-   
-   if (isIOS) {
-       instructions = `
-           <h3 style="margin-bottom: 20px;">Install on iOS</h3>
-           <ol style="text-align: left; line-height: 1.6;">
-               <li>Tap the Share button <svg width='18' height='18' viewBox='0 0 24 24' fill='none' stroke='currentColor' stroke-width='2.5' stroke-linecap='round' stroke-linejoin='round' style='display: inline-block; vertical-align: text-bottom; margin-bottom: -3px;'><path d='M4 12v8a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-8'></path><polyline points='16 6 12 2 8 6'></polyline><line x1='12' y1='2' x2='12' y2='15'></line></svg></li>
-               <li>Scroll down and tap "Add to Home Screen"</li>
-               <li>Tap "Add" to confirm</li>
-           </ol>
-       `;
-   } else if (isAndroid) {
-       instructions = `
-           <h3 style="margin-bottom: 20px;">Install on Android</h3>
-           <ol style="text-align: left; line-height: 1.6;">
-               <li>Tap the menu button <svg width='18' height='18' viewBox='0 0 24 24' fill='currentColor' style='display: inline-block; vertical-align: middle;'><circle cx='12' cy='5' r='2.5'></circle><circle cx='12' cy='12' r='2.5'></circle><circle cx='12' cy='19' r='2.5'></circle></svg> in your browser</li>
-               <li>Look for "Add to Home screen" or "Install app"</li>
-               <li>Tap "Add" or "Install" to confirm</li>
-           </ol>
-       `;
-   } else {
-       instructions = `
-           <h3 style="margin-bottom: 20px;">Install on Desktop</h3>
-           <ol style="text-align: left; line-height: 1.6;">
-               <li>Look for the install icon in your browser's address bar</li>
-               <li>Or check your browser's menu for "Install" option</li>
-               <li>Click "Install" to add to your applications</li>
-           </ol>
-       `;
-   }
-   
-   instructionsDiv.innerHTML = `
-       ${instructions}
-       <button id="instructions-close" style="
-           margin-top: 20px;
-           background: #3b82f6;
-           color: white;
-           border: none;
-           padding: 10px 20px;
-           border-radius: 6px;
-           cursor: pointer;
-           font-weight: 600;
-       ">Got it!</button>
-   `;
-   
-   document.body.appendChild(instructionsDiv);
-   
-   document.getElementById('instructions-close').addEventListener('click', () => {
-       instructionsDiv.remove();
-   });
+    const instructionsDiv = document.createElement('div');
+    instructionsDiv.style.cssText = `
+        position: fixed;
+        top: 50%;
+        left: 50%;
+        transform: translate(-50%, -50%);
+        background: #1f2937;
+        color: white;
+        padding: 30px;
+        border-radius: 12px;
+        box-shadow: 0 20px 60px rgba(0,0,0,0.5);
+        z-index: 1003;
+        max-width: 90vw;
+        width: 400px;
+        text-align: center;
+    `;
+
+    // Detect OS and specific browser for the requested logic
+    const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent);
+    const isAndroid = /Android/.test(navigator.userAgent);
+    // This check is now more specific to identify Safari and exclude other browsers on iOS
+    const isSafari = isIOS && /Safari/.test(navigator.userAgent) && !/CriOS|FxiOS/.test(navigator.userAgent);
+
+    let instructions = '';
+
+    // Case 1: User is on iOS and in the Safari browser
+    if (isSafari) {
+        instructions = `
+            <h3 style="margin-bottom: 20px;">Install on this Device</h3>
+            <ol style="text-align: left; line-height: 1.6;">
+                <li>Tap the Share button <svg width='18' height='18' viewBox='0 0 24 24' fill='none' stroke='currentColor' stroke-width='2.5' stroke-linecap='round' stroke-linejoin='round' style='display: inline-block; vertical-align: text-bottom; margin-bottom: -3px;'><path d='M4 12v8a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-8'></path><polyline points='16 6 12 2 8 6'></polyline><line x1='12' y1='2' x2='12' y2='15'></line></svg></li>
+                <li>Scroll down and tap "Add to Home Screen"</li>
+                <li>Tap "Add" to confirm</li>
+            </ol>
+        `;
+    // Case 2: User is on iOS but NOT in Safari (e.g., Chrome, Firefox)
+    } else if (isIOS) {
+        instructions = `
+            <h3 style="margin-bottom: 20px;">Please Open in Safari</h3>
+            <ol style="text-align: left; line-height: 1.6;">
+                <li>This app must be installed from the Safari browser.</li>
+                <li>Tap the Share or Menu button in your current browser.</li>
+                <li>Find and select "Open in Safari".</li>
+                <li>Once the site loads in Safari, tap the Share button there to install.</li>
+            </ol>
+        `;
+    // Case 3: User is on Android
+    } else if (isAndroid) {
+        instructions = `
+            <h3 style="margin-bottom: 20px;">Install on Android</h3>
+            <ol style="text-align: left; line-height: 1.6;">
+                <li>Tap the menu button <svg width='18' height='18' viewBox='0 0 24 24' fill='currentColor' style='display: inline-block; vertical-align: middle;'><circle cx='12' cy='5' r='2.5'></circle><circle cx='12' cy='12' r='2.5'></circle><circle cx='12' cy='19' r='2.5'></circle></svg> in your browser</li>
+                <li>Look for "Add to Home screen" or "Install app"</li>
+                <li>Tap "Add" or "Install" to confirm</li>
+            </ol>
+        `;
+    // Case 4: Any other unsupported device
+    } else {
+        instructions = `
+           <h3 style="margin-bottom: 20px;">Unsupported Device</h3>
+           <p style="line-height: 1.6;">
+               To install this app, please visit from a mobile device using iOS or Android.
+           </p>
+        `;
+    }
+
+    instructionsDiv.innerHTML = `
+        ${instructions}
+        <button id="instructions-close" style="
+            margin-top: 20px;
+            background: #3b82f6;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 6px;
+            cursor: pointer;
+            font-weight: 600;
+        ">Got it!</button>
+    `;
+    
+    document.body.appendChild(instructionsDiv);
+    
+    document.getElementById('instructions-close').addEventListener('click', () => {
+        instructionsDiv.remove();
+    });
 }
 
 /**
