@@ -3,7 +3,7 @@
  * Title: Enhanced PWA Installation Prompting System (for iOS Safari)
  * **********************************************************************************
  * @author Isaiah Tadrous
- * @version 1.2.0
+ * @version 1.2.1 - Fixed positioning and iOS detection
  * *-------------------------------------------------------------------------------
  * This script provides an enhanced installation prompting system for Progressive
  * Web Apps, specifically targeting Apple users on the Safari browser. It tracks
@@ -11,11 +11,12 @@
  * **********************************************************************************
  */
 
-// Platform detection to ensure this script ONLY runs for Apple users on Safari.
+// Enhanced platform detection to ensure this script ONLY runs for Apple users on Safari
 const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent) && !window.MSStream;
-const isSafariOnIOS = isIOS && navigator.vendor && navigator.vendor.indexOf('Apple') > -1 && !navigator.userAgent.match('CriOS');
+const isSafari = /^((?!chrome|android|crios|fxios|opios).)*safari/i.test(navigator.userAgent);
+const isSafariOnIOS = isIOS && isSafari && navigator.vendor && navigator.vendor.indexOf('Apple') > -1;
 
-// Only execute the script's logic if the user is on Safari on an iOS device.
+// Only execute the script's logic if the user is on Safari on an iOS device
 if (isSafariOnIOS) {
 
     // Configuration for installation prompting
@@ -145,19 +146,18 @@ if (isSafariOnIOS) {
         promptDiv.style.cssText = `
             position: fixed;
             bottom: 20px;
+            left: 50%;
+            transform: translateX(-50%);
             background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
             color: white;
             padding: 20px;
             border-radius: 12px;
             box-shadow: 0 8px 32px rgba(0,0,0,0.3);
-            z-index: 1002;
+            z-index: 9999;
             animation: slideInUp 0.4s ease-out;
-            /* Targeted changes for width and centering */
-            max-width: 400px; /* Set a maximum width */
-            width: calc(100% - 40px); /* Fill available width minus padding */
-            left: 0;
-            right: 0;
-            margin: auto; /* Center horizontally */
+            max-width: min(400px, calc(100vw - 40px));
+            width: auto;
+            min-width: 300px;
         `;
 
         promptDiv.innerHTML = `
@@ -194,26 +194,52 @@ if (isSafariOnIOS) {
             </div>
         `;
 
-        // Add animation CSS
+        // Add animation CSS with improved animations
         if (!document.getElementById('install-prompt-styles')) {
             const style = document.createElement('style');
             style.id = 'install-prompt-styles';
             style.textContent = `
                 @keyframes slideInUp {
                     from {
-                        transform: translate(-50%, 100%);
+                        transform: translateX(-50%) translateY(100%);
                         opacity: 0;
                     }
                     to {
-                        transform: translate(-50%, 0);
+                        transform: translateX(-50%) translateY(0);
                         opacity: 1;
                     }
                 }
+                #custom-install-prompt {
+                    /* Ensure it doesn't interfere with other modals */
+                    contain: layout style paint;
+                }
                 #custom-install-accept:hover {
                     background: rgba(255,255,255,0.3) !important;
+                    transform: translateY(-1px);
                 }
                 #custom-install-dismiss:hover {
                     background: rgba(255,255,255,0.1) !important;
+                    transform: translateY(-1px);
+                }
+                /* Media query for very small screens */
+                @media (max-width: 360px) {
+                    #custom-install-prompt {
+                        max-width: calc(100vw - 20px) !important;
+                        min-width: unset !important;
+                        left: 10px !important;
+                        right: 10px !important;
+                        transform: none !important;
+                    }
+                    @keyframes slideInUp {
+                        from {
+                            transform: translateY(100%);
+                            opacity: 0;
+                        }
+                        to {
+                            transform: translateY(0);
+                            opacity: 1;
+                        }
+                    }
                 }
             `;
             document.head.appendChild(style);
@@ -249,79 +275,118 @@ if (isSafariOnIOS) {
      * Show manual installation instructions inside an isolated overlay
      */
     function showInstallInstructions() {
-        // 1. Create the full-screen overlay
+        // Create the full-screen overlay with higher z-index to avoid conflicts
         const overlayDiv = document.createElement('div');
         overlayDiv.id = 'pwa-install-overlay';
         overlayDiv.style.cssText = `
             position: fixed;
-            inset: 0; /* Modern shorthand for top:0, left:0, bottom:0, right:0 */
+            inset: 0;
             background-color: rgba(0, 0, 0, 0.6);
-            z-index: 1003;
-            display: flex; /* Use Flexbox to center the modal */
+            z-index: 10000;
+            display: flex;
             align-items: center;
             justify-content: center;
-            padding: 16px; /* Add padding to prevent modal from touching screen edges */
+            padding: 20px;
+            backdrop-filter: blur(4px);
+            -webkit-backdrop-filter: blur(4px);
         `;
     
-        // 2. Create the instructions modal itself (now much simpler)
+        // Create the instructions modal
         const instructionsDiv = document.createElement('div');
         instructionsDiv.style.cssText = `
             background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
             color: white;
-            padding: 20px;
-            border-radius: 12px;
-            box-shadow: 0 10px 40px rgba(0,0,0,0.4);
+            padding: 24px;
+            border-radius: 16px;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.4);
             width: 100%;
-            max-width: 400px; /* Set the max width of the modal */
+            max-width: 420px;
+            animation: modalFadeIn 0.3s ease-out;
         `;
     
-        // --- Instructions HTML updated to match prompt style ---
         instructionsDiv.innerHTML = `
-            <div style="display: flex; align-items: center; gap: 15px; margin-bottom: 15px;">
+            <div style="display: flex; align-items: center; gap: 15px; margin-bottom: 20px;">
                 <div style="flex-shrink: 0;">
                     <svg xmlns='http://www.w3.org/2000/svg' width='40' height='40' viewBox='0 0 24 24' fill='none' stroke='white' stroke-width='1.5' stroke-linecap='round' stroke-linejoin='round'><path d='M4 12v8a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-8'></path><polyline points='16 6 12 2 8 6'></polyline><line x1='12' y1='2' x2='12' y2='15'></line></svg>
                 </div>
                 <div style="flex: 1; text-align: left;">
-                    <div style="font-weight: 600; margin-bottom: 5px;">Install on this Device</div>
+                    <div style="font-weight: 600; margin-bottom: 5px; font-size: 1.1rem;">Install on this Device</div>
                     <div style="font-size: 0.9rem; opacity: 0.9;">Follow these steps:</div>
                 </div>
             </div>
-            <ol style="text-align: left; line-height: 1.8; padding-left: 20px; font-size: 0.95rem; margin: 0;">
-                <li>Tap the <strong>Share</strong> button</li>
-                <li>Scroll down and tap <strong>Add to Home Screen</strong></li>
-                <li>Tap <strong>Add</strong> to confirm</li>
+            <ol style="text-align: left; line-height: 1.8; padding-left: 20px; font-size: 0.95rem; margin: 0 0 20px 0;">
+                <li style="margin-bottom: 8px;">Tap the <strong>Share</strong> button <span style="opacity: 0.7;">(usually at the bottom of Safari)</span></li>
+                <li style="margin-bottom: 8px;">Scroll down and tap <strong>"Add to Home Screen"</strong></li>
+                <li>Tap <strong>"Add"</strong> to confirm installation</li>
             </ol>
             <button id="instructions-close" style="
-                margin-top: 20px;
                 width: 100%;
                 background: rgba(255,255,255,0.2);
                 border: 1px solid rgba(255,255,255,0.3);
                 color: white;
-                padding: 10px 20px;
-                border-radius: 6px;
+                padding: 12px 20px;
+                border-radius: 8px;
                 cursor: pointer;
                 font-weight: 600;
-            ">Done</button>
+                font-size: 1rem;
+                transition: all 0.2s;
+            ">Got it!</button>
         `;
+
+        // Add modal animation styles if not already added
+        if (!document.getElementById('modal-animation-styles')) {
+            const modalStyle = document.createElement('style');
+            modalStyle.id = 'modal-animation-styles';
+            modalStyle.textContent = `
+                @keyframes modalFadeIn {
+                    from {
+                        opacity: 0;
+                        transform: scale(0.9) translateY(20px);
+                    }
+                    to {
+                        opacity: 1;
+                        transform: scale(1) translateY(0);
+                    }
+                }
+                #instructions-close:hover {
+                    background: rgba(255,255,255,0.3) !important;
+                    transform: translateY(-2px);
+                }
+            `;
+            document.head.appendChild(modalStyle);
+        }
     
-        // 3. Add the modal to the overlay, and the overlay to the page
+        // Add the modal to the overlay, and the overlay to the page
         overlayDiv.appendChild(instructionsDiv);
         document.body.appendChild(overlayDiv);
     
-        // 4. Set up the close button to remove the entire overlay
+        // Set up the close button
         document.getElementById('instructions-close').addEventListener('click', () => {
-            overlayDiv.remove();
+            overlayDiv.style.animation = 'fadeOut 0.2s ease-in forwards';
+            setTimeout(() => {
+                overlayDiv.remove();
+            }, 200);
         });
     
-        // --- Allow closing by clicking the overlay background ---
-        overlayDiv.addEventListener('click', () => {
-            overlayDiv.remove();
+        // Allow closing by clicking the overlay background
+        overlayDiv.addEventListener('click', (e) => {
+            if (e.target === overlayDiv) {
+                overlayDiv.style.animation = 'fadeOut 0.2s ease-in forwards';
+                setTimeout(() => {
+                    overlayDiv.remove();
+                }, 200);
+            }
         });
-    
-        // Prevent clicks *inside* the modal from closing it
-        instructionsDiv.addEventListener('click', (e) => {
-            e.stopPropagation();
-        });
+
+        // Add fade out animation
+        const fadeStyle = document.createElement('style');
+        fadeStyle.textContent = `
+            @keyframes fadeOut {
+                from { opacity: 1; }
+                to { opacity: 0; }
+            }
+        `;
+        document.head.appendChild(fadeStyle);
     }
     
     /**
@@ -352,4 +417,102 @@ if (isSafariOnIOS) {
         })
     };
 
-} // End of the isSafariOnIOS check
+} else if (/iPad|iPhone|iPod/.test(navigator.userAgent) && !window.MSStream) {
+    // iOS device but not Safari - show a message to use Safari
+    
+    function showSafariPrompt() {
+        const safariPrompt = document.createElement('div');
+        safariPrompt.id = 'safari-required-prompt';
+        safariPrompt.style.cssText = `
+            position: fixed;
+            bottom: 20px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: linear-gradient(135deg, #ff6b6b 0%, #ee5a24 100%);
+            color: white;
+            padding: 20px;
+            border-radius: 12px;
+            box-shadow: 0 8px 32px rgba(0,0,0,0.3);
+            z-index: 9999;
+            animation: slideInUp 0.4s ease-out;
+            max-width: min(400px, calc(100vw - 40px));
+            width: auto;
+            min-width: 300px;
+            text-align: center;
+        `;
+
+        safariPrompt.innerHTML = `
+            <div style="display: flex; align-items: center; gap: 15px; margin-bottom: 15px;">
+                <div style="flex-shrink: 0;">
+                    <svg xmlns='http://www.w3.org/2000/svg' width='32' height='32' viewBox='0 0 24 24' fill='none' stroke='white' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'><circle cx='12' cy='12' r='10'></circle><polyline points='12 6 12 12 16 14'></polyline></svg>
+                </div>
+                <div style="flex: 1; text-align: left;">
+                    <div style="font-weight: 600; margin-bottom: 5px;">Safari Required</div>
+                    <div style="font-size: 0.9rem; opacity: 0.9;">Please use Safari to install this app</div>
+                </div>
+            </div>
+            <button id="safari-prompt-dismiss" style="
+                width: 100%;
+                background: rgba(255,255,255,0.2);
+                border: 1px solid rgba(255,255,255,0.3);
+                color: white;
+                padding: 10px 15px;
+                border-radius: 6px;
+                font-weight: 600;
+                cursor: pointer;
+                transition: all 0.2s;
+            ">Understood</button>
+        `;
+
+        // Add the same animation styles if not present
+        if (!document.getElementById('install-prompt-styles')) {
+            const style = document.createElement('style');
+            style.id = 'install-prompt-styles';
+            style.textContent = `
+                @keyframes slideInUp {
+                    from {
+                        transform: translateX(-50%) translateY(100%);
+                        opacity: 0;
+                    }
+                    to {
+                        transform: translateX(-50%) translateY(0);
+                        opacity: 1;
+                    }
+                }
+                @media (max-width: 360px) {
+                    #safari-required-prompt {
+                        max-width: calc(100vw - 20px) !important;
+                        min-width: unset !important;
+                        left: 10px !important;
+                        right: 10px !important;
+                        transform: none !important;
+                    }
+                }
+            `;
+            document.head.appendChild(style);
+        }
+
+        document.body.appendChild(safariPrompt);
+
+        document.getElementById('safari-prompt-dismiss').addEventListener('click', () => {
+            safariPrompt.remove();
+        });
+    }
+
+    // Show Safari prompt after a short delay if user interacts with the page
+    let hasInteracted = false;
+    const showSafariPromptOnce = () => {
+        if (!hasInteracted) {
+            hasInteracted = true;
+            setTimeout(showSafariPrompt, 2000);
+        }
+    };
+
+    document.addEventListener('DOMContentLoaded', () => {
+        ['click', 'scroll', 'touchstart'].forEach(eventType => {
+            document.addEventListener(eventType, showSafariPromptOnce, { once: true });
+        });
+    });
+}
+
+// End of the script
