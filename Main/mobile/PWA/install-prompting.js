@@ -23,7 +23,7 @@ if (isSafariOnIOS) {
     // Configuration for installation prompting
     const PROMPT_CONFIG = {
         // Show prompt after user has been on site for X milliseconds
-        minTimeOnSite: 1, // 1 seconds for instant prompt
+        minTimeOnSite: 2.7, // 2.7 seconds for instant prompt
 
         // Show prompt after user has visited X pages/interactions
         minInteractions: 0
