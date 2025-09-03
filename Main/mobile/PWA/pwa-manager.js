@@ -3,20 +3,24 @@
  * Title: PWA Management and Update Notification System
  * **********************************************************************************
  * @author Isaiah Tadrous
- * @version 1.1.0
+ * @version 1.2.0
  * *-------------------------------------------------------------------------------
  * This script handles the registration of the service worker, manages the PWA
  * update lifecycle, and provides a custom install prompt experience. It detects
  * when a new version of the service worker is available, caches it in the
  * background, and then presents a notification to the user with an option to
  * refresh the page to activate the new version. It also manages the custom
- * install prompt to give users control over when they install the app.
+ * install prompt and checks for updates every time the app starts.
  * **********************************************************************************
  */
 
-// --- PWA CUSTOM INSTALL PROMPT ---
+// --- GLOBAL VARIABLES ---
 
 let deferredPrompt; // This variable will save the beforeinstallprompt event reference.
+let registration; // Store the service worker registration
+let updateCheckInterval; // Store the interval for periodic update checks
+
+// --- PWA CUSTOM INSTALL PROMPT ---
 
 /**
  * Listen for the beforeinstallprompt event to capture the install prompt
@@ -57,7 +61,8 @@ function handleInstallClick() {
             
             if (choiceResult.outcome === 'accepted') {
                 console.log('User accepted the install prompt');
-                // Optionally show a success message or analytics event
+                // Show success message
+                showInstallSuccessMessage();
             } else {
                 console.log('User dismissed the install prompt');
             }
@@ -78,6 +83,34 @@ function handleInstallClick() {
 }
 
 /**
+ * Show a success message when the app is installed
+ */
+function showInstallSuccessMessage() {
+    const message = document.createElement('div');
+    message.style.cssText = `
+        position: fixed;
+        top: 20px;
+        left: 50%;
+        transform: translateX(-50%);
+        background-color: #10b981;
+        color: white;
+        padding: 15px 25px;
+        border-radius: 8px;
+        box-shadow: 0 4px 12px rgba(0,0,0,0.3);
+        z-index: 1001;
+        font-size: 1rem;
+        font-weight: 500;
+    `;
+    message.textContent = 'App installed successfully! All puzzles are now available offline.';
+    document.body.appendChild(message);
+    
+    // Remove the message after 4 seconds
+    setTimeout(() => {
+        message.remove();
+    }, 4000);
+}
+
+/**
  * Listen for when the app is successfully installed.
  * This fires when the user installs the app from any source.
  */
@@ -93,8 +126,11 @@ window.addEventListener('appinstalled', (e) => {
         installButton.style.display = 'none';
     }
     
-    // Optionally send an analytics event to track successful installs
-    // analytics.track('pwa_installed');
+    // Show success message
+    showInstallSuccessMessage();
+    
+    // Start periodic update checks now that the app is installed
+    startPeriodicUpdateChecks();
 });
 
 // --- PWA SERVICE WORKER REGISTRATION AND UPDATE ---
@@ -102,44 +138,109 @@ window.addEventListener('appinstalled', (e) => {
 /**
  * Registers the service worker and sets up the update notification system.
  * This function is the entry point for all PWA-related functionality.
- * @returns {void}
+ * @returns {Promise<void>}
  */
-function registerServiceWorker() {
+async function registerServiceWorker() {
     // Check if service workers are supported by the browser
     if ('serviceWorker' in navigator) {
-        // Register the service worker using a relative path and scope it to the current directory.
-        navigator.serviceWorker.register('service-worker.js', { scope: '.' })
-            .then(registration => {
-                console.log('Service Worker registered with scope:', registration.scope);
-                
-                // Listen for updates to the service worker
-                registration.addEventListener('updatefound', () => {
-                    console.log('New service worker version found, installing...');
-                    const newWorker = registration.installing;
-                    
-                    if (newWorker) {
-                        newWorker.addEventListener('statechange', () => {
-                            console.log('New service worker state:', newWorker.state);
-                            
-                            // When the new service worker is installed and waiting, show the update notification
-                            if (newWorker.state === 'installed' && navigator.serviceWorker.controller) {
-                                console.log('New version ready, showing update notification');
-                                showUpdateNotification(newWorker);
-                            }
-                        });
-                    }
-                });
-                
-                // Check if there's already a waiting service worker
-                if (registration.waiting) {
-                    showUpdateNotification(registration.waiting);
-                }
-            })
-            .catch(error => {
-                console.error('Service Worker registration failed:', error);
+        try {
+            // Register the service worker using a relative path and scope it to the current directory.
+            registration = await navigator.serviceWorker.register('./service-worker.js', { 
+                scope: './',
+                updateViaCache: 'none' // Always check for updates
             });
+            
+            console.log('Service Worker registered with scope:', registration.scope);
+            
+            // Check for updates immediately
+            await checkForUpdates();
+            
+            // Listen for updates to the service worker
+            registration.addEventListener('updatefound', handleUpdateFound);
+            
+            // Check if there's already a waiting service worker
+            if (registration.waiting) {
+                console.log('Service worker is waiting, showing update notification');
+                showUpdateNotification(registration.waiting);
+            }
+            
+            // Listen for when the service worker becomes active
+            if (registration.active) {
+                console.log('Service worker is active');
+            }
+            
+            // Start periodic update checks
+            startPeriodicUpdateChecks();
+            
+        } catch (error) {
+            console.error('Service Worker registration failed:', error);
+        }
     } else {
         console.log('Service Workers are not supported by this browser');
+    }
+}
+
+/**
+ * Handle when a new service worker is found
+ */
+function handleUpdateFound() {
+    console.log('New service worker version found, installing...');
+    const newWorker = registration.installing;
+    
+    if (newWorker) {
+        newWorker.addEventListener('statechange', () => {
+            console.log('New service worker state:', newWorker.state);
+            
+            // When the new service worker is installed and waiting, show the update notification
+            if (newWorker.state === 'installed' && navigator.serviceWorker.controller) {
+                console.log('New version ready, showing update notification');
+                showUpdateNotification(newWorker);
+            }
+        });
+    }
+}
+
+/**
+ * Check for service worker updates
+ * @returns {Promise<void>}
+ */
+async function checkForUpdates() {
+    if (registration) {
+        try {
+            console.log('Checking for service worker updates...');
+            await registration.update();
+        } catch (error) {
+            console.error('Failed to check for updates:', error);
+        }
+    }
+}
+
+/**
+ * Start periodic update checks (every 30 minutes)
+ */
+function startPeriodicUpdateChecks() {
+    // Clear any existing interval
+    if (updateCheckInterval) {
+        clearInterval(updateCheckInterval);
+    }
+    
+    // Check for updates every 30 minutes (1800000 ms)
+    updateCheckInterval = setInterval(() => {
+        console.log('Performing periodic update check...');
+        checkForUpdates();
+    }, 1800000); // 30 minutes
+    
+    console.log('Started periodic update checks (every 30 minutes)');
+}
+
+/**
+ * Stop periodic update checks
+ */
+function stopPeriodicUpdateChecks() {
+    if (updateCheckInterval) {
+        clearInterval(updateCheckInterval);
+        updateCheckInterval = null;
+        console.log('Stopped periodic update checks');
     }
 }
 
@@ -160,19 +261,81 @@ function showUpdateNotification(newWorker) {
     // Create the update notification element
     const notification = document.createElement('div');
     notification.id = 'update-notification';
-    notification.innerHTML = `
-        <p>A new version is available!</p>
-        <button id="reload-button">Update Now</button>
+    notification.style.cssText = `
+        position: fixed;
+        bottom: 20px;
+        left: 50%;
+        transform: translateX(-50%);
+        background-color: #1a1a1a;
+        color: white;
+        padding: 15px 25px;
+        border-radius: 8px;
+        box-shadow: 0 4px 12px rgba(0,0,0,0.4);
+        z-index: 1000;
+        display: flex;
+        align-items: center;
+        gap: 20px;
+        font-size: 1.1rem;
+        max-width: 90vw;
+        animation: slideInUp 0.3s ease-out;
     `;
+    
+    notification.innerHTML = `
+        <div style="flex: 1;">
+            <p style="margin: 0; font-weight: 500;">A new version is available!</p>
+            <p style="margin: 0; font-size: 0.9rem; opacity: 0.8;">Update now to get the latest features and improvements.</p>
+        </div>
+        <button id="reload-button" style="
+            background-color: #2563eb;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 5px;
+            cursor: pointer;
+            font-weight: bold;
+            font-size: 1rem;
+            transition: background-color 0.2s;
+            white-space: nowrap;
+        ">Update Now</button>
+        <button id="dismiss-update" style="
+            background: transparent;
+            color: #9ca3af;
+            border: none;
+            padding: 5px;
+            cursor: pointer;
+            font-size: 1.5rem;
+            line-height: 1;
+        ">&times;</button>
+    `;
+    
+    // Add CSS animation
+    const style = document.createElement('style');
+    style.textContent = `
+        @keyframes slideInUp {
+            from {
+                transform: translate(-50%, 100%);
+                opacity: 0;
+            }
+            to {
+                transform: translate(-50%, 0);
+                opacity: 1;
+            }
+        }
+    `;
+    document.head.appendChild(style);
     
     // Add the notification to the page
     document.body.appendChild(notification);
     
-    // Add a click listener to the "Update Now" button
+    // Add click listener to the "Update Now" button
     const reloadButton = document.getElementById('reload-button');
     if (reloadButton) {
         reloadButton.addEventListener('click', () => {
             console.log('User chose to update the app');
+            
+            // Show loading state
+            reloadButton.textContent = 'Updating...';
+            reloadButton.disabled = true;
             
             // Send a message to the new service worker to skip waiting and activate immediately
             newWorker.postMessage({ action: 'skipWaiting' });
@@ -185,6 +348,42 @@ function showUpdateNotification(newWorker) {
             });
         });
     }
+    
+    // Add click listener to the dismiss button
+    const dismissButton = document.getElementById('dismiss-update');
+    if (dismissButton) {
+        dismissButton.addEventListener('click', () => {
+            console.log('User dismissed update notification');
+            notification.remove();
+        });
+    }
+    
+    // Auto-dismiss after 30 seconds if user doesn't interact
+    setTimeout(() => {
+        if (document.getElementById('update-notification')) {
+            console.log('Auto-dismissing update notification');
+            notification.remove();
+        }
+    }, 30000);
+}
+
+/**
+ * Check if the app is running in standalone mode (installed as PWA)
+ */
+function isStandalone() {
+    return window.matchMedia('(display-mode: standalone)').matches || 
+           window.navigator.standalone || 
+           document.referrer.includes('android-app://');
+}
+
+/**
+ * Handle visibility change to check for updates when app becomes visible
+ */
+function handleVisibilityChange() {
+    if (!document.hidden) {
+        console.log('App became visible, checking for updates...');
+        checkForUpdates();
+    }
 }
 
 // --- INITIALIZATION ---
@@ -193,27 +392,57 @@ function showUpdateNotification(newWorker) {
  * Initialize PWA functionality when the DOM is loaded.
  * This ensures all elements are available before we try to interact with them.
  */
-document.addEventListener('DOMContentLoaded', () => {
+async function initializePWA() {
+    console.log('Initializing PWA functionality...');
+    
     // Register the service worker
-    registerServiceWorker();
+    await registerServiceWorker();
     
     // Set up the custom install button click handler
     const installButton = document.getElementById('install-pwa-btn');
     if (installButton) {
         installButton.addEventListener('click', handleInstallClick);
     }
-});
+    
+    // Listen for app visibility changes to check for updates
+    document.addEventListener('visibilitychange', handleVisibilityChange);
+    
+    // Check for updates when the app gains focus
+    window.addEventListener('focus', () => {
+        console.log('App gained focus, checking for updates...');
+        checkForUpdates();
+    });
+    
+    // If app is running in standalone mode, hide install button
+    if (isStandalone()) {
+        console.log('App is running in standalone mode');
+        if (installButton) {
+            installButton.style.display = 'none';
+        }
+    }
+    
+    console.log('PWA initialization complete');
+}
 
-// If the DOM is already loaded (script loaded after DOM), initialize immediately
+// Initialize when DOM is ready
 if (document.readyState === 'loading') {
-    // DOM is still loading, wait for DOMContentLoaded
-    // (handled by the event listener above)
+    document.addEventListener('DOMContentLoaded', initializePWA);
 } else {
     // DOM is already loaded
-    registerServiceWorker();
-    
-    const installButton = document.getElementById('install-pwa-btn');
-    if (installButton) {
-        installButton.addEventListener('click', handleInstallClick);
-    }
+    initializePWA();
+}
+
+// Cleanup on page unload
+window.addEventListener('beforeunload', () => {
+    stopPeriodicUpdateChecks();
+});
+
+// Export functions for debugging (optional)
+if (typeof window !== 'undefined') {
+    window.PWAManager = {
+        checkForUpdates,
+        startPeriodicUpdateChecks,
+        stopPeriodicUpdateChecks,
+        isStandalone
+    };
 }
