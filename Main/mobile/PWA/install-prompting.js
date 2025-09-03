@@ -1,15 +1,15 @@
 /**
- * **********************************************************************************
- * Title: Enhanced PWA Installation Prompting System (for iOS Safari)
- * **********************************************************************************
- * @author Isaiah Tadrous
- * @version 1.2.1 
- * *-------------------------------------------------------------------------------
- * This script provides an enhanced installation prompting system for Progressive
- * Web Apps, specifically targeting Apple users on the Safari browser. It tracks
- * user engagement and presents installation prompts at optimal moments.
- * **********************************************************************************
- */
+ * **********************************************************************************
+ * Title: Enhanced PWA Installation Prompting System (for iOS Safari)
+ * **********************************************************************************
+ * @author Isaiah Tadrous
+ * @version 1.3.0
+ * *-------------------------------------------------------------------------------
+ * This script provides an enhanced installation prompting system for Progressive
+ * Web Apps, specifically targeting Apple users on the Safari browser. It tracks
+ * user engagement and presents installation prompts at optimal moments.
+ * **********************************************************************************
+ */
 
 
 // Enhanced platform detection to ensure this script ONLY runs for Apple users on Safari
@@ -149,16 +149,16 @@ if (isSafariOnIOS) {
             bottom: 20px;
             left: 50%;
             transform: translateX(-50%);
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            background: linear-gradient(135deg, #0976ea 0%, #0d47a1 100%);
             color: white;
             padding: 20px;
             border-radius: 12px;
             box-shadow: 0 8px 32px rgba(0,0,0,0.3);
             z-index: 9999;
             animation: slideInUp 0.4s ease-out;
-            max-width: min(400px, calc(100vw - 40px));
+            max-width: min(550px, calc(100vw - 40px));
             width: auto;
-            min-width: 300px;
+            min-width: 350px;
         `;
 
         promptDiv.innerHTML = `
@@ -292,20 +292,20 @@ if (isSafariOnIOS) {
             backdrop-filter: blur(4px);
             -webkit-backdrop-filter: blur(4px);
         `;
-    
+
         // Create the instructions modal
         const instructionsDiv = document.createElement('div');
         instructionsDiv.style.cssText = `
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            background: linear-gradient(135deg, #0976ea 0%, #0d47a1 100%);
             color: white;
             padding: 24px;
             border-radius: 16px;
             box-shadow: 0 20px 60px rgba(0,0,0,0.4);
             width: 100%;
-            max-width: 420px;
+            max-width: 550px;
             animation: modalFadeIn 0.3s ease-out;
         `;
-    
+
         instructionsDiv.innerHTML = `
             <div style="display: flex; align-items: center; gap: 15px; margin-bottom: 20px;">
                 <div style="flex-shrink: 0;">
@@ -357,11 +357,11 @@ if (isSafariOnIOS) {
             `;
             document.head.appendChild(modalStyle);
         }
-    
+
         // Add the modal to the overlay, and the overlay to the page
         overlayDiv.appendChild(instructionsDiv);
         document.body.appendChild(overlayDiv);
-    
+
         // Set up the close button
         document.getElementById('instructions-close').addEventListener('click', () => {
             overlayDiv.style.animation = 'fadeOut 0.2s ease-in forwards';
@@ -369,7 +369,7 @@ if (isSafariOnIOS) {
                 overlayDiv.remove();
             }, 200);
         });
-    
+
         // Allow closing by clicking the overlay background
         overlayDiv.addEventListener('click', (e) => {
             if (e.target === overlayDiv) {
@@ -390,7 +390,7 @@ if (isSafariOnIOS) {
         `;
         document.head.appendChild(fadeStyle);
     }
-    
+
     /**
      * Save prompt data to localStorage
      */
@@ -421,7 +421,7 @@ if (isSafariOnIOS) {
 
 } else if (/iPad|iPhone|iPod/.test(navigator.userAgent) && !window.MSStream) {
     // iOS device but not Safari - show a message to use Safari
-    
+
     function showSafariPrompt() {
         const safariPrompt = document.createElement('div');
         safariPrompt.id = 'safari-required-prompt';
