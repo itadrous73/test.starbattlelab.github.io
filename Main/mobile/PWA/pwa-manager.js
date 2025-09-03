@@ -337,44 +337,45 @@ function showUpdateNotification(newWorker) {
         bottom: 20px;
         left: 50%;
         transform: translateX(-50%);
-        background-color: #1a1a1a;
+        background: linear-gradient(135deg, #0976ea 0%, #0d47a1 100%);
         color: white;
-        padding: 15px 25px;
-        border-radius: 8px;
-        box-shadow: 0 4px 12px rgba(0,0,0,0.4);
+        padding: 20px;
+        border-radius: 12px;
+        box-shadow: 0 8px 32px rgba(0,0,0,0.3);
         z-index: 1000;
         display: flex;
         align-items: center;
-        gap: 20px;
-        font-size: 1.1rem;
-        max-width: 90vw;
+        gap: 15px;
+        font-size: 1rem;
+        max-width: min(550px, calc(100vw - 40px));
         animation: slideInUp 0.3s ease-out;
     `;
 
     notification.innerHTML = `
         <div style="flex: 1;">
-            <p style="margin: 0; font-weight: 500;">A new version is available!</p>
-            <p style="margin: 0; font-size: 0.9rem; opacity: 0.8;">Update now to get the latest features and improvements.</p>
+            <p style="margin: 0; font-weight: 600;">A new version is available!</p>
+            <p style="margin: 0; font-size: 0.9rem; opacity: 0.9;">Update now to get the latest features.</p>
         </div>
         <button id="reload-button" style="
-            background-color: #2563eb;
+            background: rgba(255,255,255,0.2);
+            border: 1px solid rgba(255,255,255,0.3);
             color: white;
-            border: none;
             padding: 10px 20px;
-            border-radius: 5px;
+            border-radius: 6px;
             cursor: pointer;
-            font-weight: bold;
+            font-weight: 600;
             font-size: 1rem;
             transition: background-color 0.2s;
             white-space: nowrap;
         ">Update Now</button>
         <button id="dismiss-update" style="
             background: transparent;
-            color: #9ca3af;
+            color: white;
             border: none;
+            opacity: 0.8;
             padding: 5px;
             cursor: pointer;
-            font-size: 1.5rem;
+            font-size: 1.75rem;
             line-height: 1;
         ">&times;</button>
     `;
@@ -392,6 +393,9 @@ function showUpdateNotification(newWorker) {
                 opacity: 1;
             }
         }
+        #reload-button:hover {
+             background: rgba(255,255,255,0.3) !important;
+        }
     `;
     document.head.appendChild(style);
 
@@ -403,20 +407,9 @@ function showUpdateNotification(newWorker) {
     if (reloadButton) {
         reloadButton.addEventListener('click', () => {
             console.log('User chose to update the app');
-
-            // Show loading state
             reloadButton.textContent = 'Updating...';
             reloadButton.disabled = true;
-
-            // Send a message to the new service worker to skip waiting and activate immediately
             newWorker.postMessage({ action: 'skipWaiting' });
-
-            // Listen for the controlling service worker to change
-            navigator.serviceWorker.addEventListener('controllerchange', () => {
-                console.log('New service worker activated, reloading page');
-                // Reload the page to apply the update
-                window.location.reload();
-            });
         });
     }
 
@@ -428,6 +421,12 @@ function showUpdateNotification(newWorker) {
             notification.remove();
         });
     }
+
+    // This listener correctly reloads the page AFTER the new service worker has taken control.
+    navigator.serviceWorker.addEventListener('controllerchange', () => {
+        console.log('New service worker activated, reloading page');
+        window.location.reload();
+    });
 
     // Auto-dismiss after 30 seconds if user doesn't interact
     setTimeout(() => {
