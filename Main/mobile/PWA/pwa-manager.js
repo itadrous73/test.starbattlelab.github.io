@@ -431,6 +431,7 @@ function showUpdateNotification(newWorker) {
     }, 30000);
 }
 
+
 /**
  * Check if the app is running in standalone mode (installed as PWA)
  */
