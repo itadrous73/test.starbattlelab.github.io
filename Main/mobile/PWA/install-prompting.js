@@ -1,16 +1,19 @@
 /**
  * **********************************************************************************
- * Title: PWA Installation Prompting System (for Safari)
+ * Title: Safari Progressive Web App Installation System
  * **********************************************************************************
  * @author Isaiah Tadrous
  * @version 2.2.0
  * *-------------------------------------------------------------------------------
- * This script provides an installation prompting system for Progressive
- * Web Apps on Safari. It presents an installation prompt after a set delay.
+ * Cross-platform PWA installation system specifically designed for Safari browsers.
+ * Automatically detects Safari environments and presents user-friendly installation
+ * prompts with step-by-step instructions for adding the web application to the
+ * device home screen. Features responsive design, modal overlays, and proper
+ * event handling for optimal user experience across iOS and macOS Safari.
  * **********************************************************************************
  */
 
-// Check if user is on Safari browser (any device) and not already installed
+// Detect Safari browser environment and check installation status
 const isSafariCheck = /^((?!chrome|android|crios|fxios|opios).)*safari/i.test(navigator.userAgent) &&
                       navigator.vendor && navigator.vendor.indexOf('Apple') > -1;
 const isInstalled = 'standalone' in window.navigator && window.navigator.standalone;
@@ -84,7 +87,7 @@ if (isSafariCheck && !isInstalled) {
         });
         
         prompt.querySelector('#install-no').addEventListener('click', () => {
-            prompt.remove(); // This just hides the prompt for the current session.
+            prompt.remove(); // Dismiss prompt for current session without persistence
         });
     }
     
@@ -195,8 +198,7 @@ if (isSafariCheck && !isInstalled) {
         init();
     }
     
-    // Debug access
-    // CHANGED: Simplified the debug object as time tracking was removed.
+    // Development and debugging interface for prompt management
     window.safariInstallPrompt = {
         show: showPrompt,
         stats: () => ({
