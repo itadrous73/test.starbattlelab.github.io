@@ -16,33 +16,41 @@
 
 // --- GLOBAL VARIABLES ---
 
-let deferredPrompt; // This variable will save the beforeinstallprompt event reference.
-let registration; // Store the service worker registration
-let updateCheckInterval; // Store the interval for periodic update checks
+let deferredPrompt; 
+let registration; 
+let updateCheckInterval; 
+
+// --- PLATFORM DETECTION (FIXED) ---
+const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent) && !window.MSStream;
+const isSafari = /^((?!chrome|android|crios|fxios|opios).)*safari/i.test(navigator.userAgent);
+const isSafariOnIOS = isIOS && isSafari && navigator.vendor && navigator.vendor.indexOf('Apple') > -1;
 
 // --- PWA CUSTOM INSTALL PROMPT ---
 
 /**
- * Listen for the beforeinstallprompt event to capture the install prompt
- * and show our custom install button when the app meets PWA criteria.
+ * Listen for the beforeinstallprompt event - but ONLY for non-iOS devices
  */
 window.addEventListener('beforeinstallprompt', (e) => {
+    // FIXED: Only handle this event if NOT on iOS Safari (let install-prompting.js handle iOS)
+    if (isSafariOnIOS) {
+        return; // Let install-prompting.js handle iOS Safari
+    }
+    
     console.log('App is installable - showing custom install prompt.');
-
-    // Prevent the browser's default mini-infobar from appearing.
     e.preventDefault();
-
-    // Stash the event so it can be triggered later.
     deferredPrompt = e;
-
-    // Show the custom install prompt instead of the static button.
-    showCustomInstallPrompt();
+    
+    // Show prompt after a delay to avoid conflicts
+    setTimeout(showCustomInstallPrompt, 1000);
 });
 
 /**
- * NEW: Creates and displays a custom, styled install prompt.
+ * Creates and displays a custom install prompt (NON-iOS only)
  */
 function showCustomInstallPrompt() {
+    // FIXED: Don't show if on iOS Safari
+    if (isSafariOnIOS) return;
+    
     // Avoid showing multiple prompts
     if (document.getElementById('custom-install-prompt')) return;
 
@@ -58,7 +66,7 @@ function showCustomInstallPrompt() {
         padding: 20px;
         border-radius: 12px;
         box-shadow: 0 8px 32px rgba(0,0,0,0.3);
-        z-index: 9999;
+        z-index: 9998;
         animation: slideInUp 0.4s ease-out;
         max-width: min(550px, calc(100vw - 40px));
         width: auto;
@@ -89,7 +97,7 @@ function showCustomInstallPrompt() {
         </div>
     `;
 
-    // Add animation CSS with improved animations
+    // Add animation CSS
     if (!document.getElementById('install-prompt-styles')) {
         const style = document.createElement('style');
         style.id = 'install-prompt-styles';
@@ -117,31 +125,25 @@ function showCustomInstallPrompt() {
 
 /**
  * Handle the custom install button click event.
- * This triggers the browser's native install prompt.
  */
 function handleInstallClick() {
     const installButton = document.getElementById('install-pwa-btn');
 
     if (deferredPrompt) {
-        // Show the browser's install prompt.
         deferredPrompt.prompt();
 
-        // Wait for the user to respond to the prompt.
         deferredPrompt.userChoice.then((choiceResult) => {
             console.log(`User response to the install prompt: ${choiceResult.outcome}`);
 
             if (choiceResult.outcome === 'accepted') {
                 console.log('User accepted the install prompt');
-                // Show success message
                 showInstallSuccessMessage();
             } else {
                 console.log('User dismissed the install prompt');
             }
 
-            // The prompt can only be used once, so clear the variable.
             deferredPrompt = null;
 
-            // Hide the button after the prompt is shown.
             if (installButton) {
                 installButton.style.display = 'none';
             }
@@ -175,7 +177,6 @@ function showInstallSuccessMessage() {
     message.textContent = 'App installed successfully! All puzzles are now available offline.';
     document.body.appendChild(message);
 
-    // Remove the message after 4 seconds
     setTimeout(() => {
         message.remove();
     }, 4000);
@@ -183,24 +184,18 @@ function showInstallSuccessMessage() {
 
 /**
  * Listen for when the app is successfully installed.
- * This fires when the user installs the app from any source.
  */
 window.addEventListener('appinstalled', (e) => {
     console.log('PWA was successfully installed');
 
-    // Clear the deferredPrompt so it can be garbage collected.
     deferredPrompt = null;
 
-    // Hide the install button if it's still visible
     const installButton = document.getElementById('install-pwa-btn');
     if (installButton) {
         installButton.style.display = 'none';
     }
 
-    // Show success message
     showInstallSuccessMessage();
-
-    // Start periodic update checks now that the app is installed
     startPeriodicUpdateChecks();
 });
 
@@ -208,25 +203,18 @@ window.addEventListener('appinstalled', (e) => {
 
 /**
  * Registers the service worker and sets up the update notification system.
- * This function is the entry point for all PWA-related functionality.
- * @returns {Promise<void>}
  */
 async function registerServiceWorker() {
-    // Check if service workers are supported by the browser
     if ('serviceWorker' in navigator) {
         try {
-            // Register the service worker using a relative path and scope it to the current directory.
             registration = await navigator.serviceWorker.register('./service-worker.js', {
                 scope: './',
-                updateViaCache: 'none' // Always check for updates
+                updateViaCache: 'none'
             });
 
             console.log('Service Worker registered with scope:', registration.scope);
 
-            // Check for updates immediately
             await checkForUpdates();
-
-            // Listen for updates to the service worker
             registration.addEventListener('updatefound', handleUpdateFound);
 
             if (registration.waiting) {
@@ -234,12 +222,10 @@ async function registerServiceWorker() {
                 showUpdateNotification(registration.waiting);
             }
 
-            // Listen for when the service worker becomes active
             if (registration.active) {
                 console.log('Service worker is active');
             }
 
-            // Start periodic update checks
             startPeriodicUpdateChecks();
 
         } catch (error) {
@@ -261,7 +247,6 @@ function handleUpdateFound() {
         newWorker.addEventListener('statechange', () => {
             console.log('New service worker state:', newWorker.state);
 
-            // When the new service worker is installed and waiting, show the update notification
             if (newWorker.state === 'installed' && navigator.serviceWorker.controller) {
                 console.log('New version ready, showing update notification');
                 showUpdateNotification(newWorker);
@@ -272,7 +257,6 @@ function handleUpdateFound() {
 
 /**
  * Check for service worker updates
- * @returns {Promise<void>}
  */
 async function checkForUpdates() {
     if (registration) {
@@ -289,12 +273,10 @@ async function checkForUpdates() {
  * Start periodic update checks (every 30 minutes)
  */
 function startPeriodicUpdateChecks() {
-    // Clear any existing interval
     if (updateCheckInterval) {
         clearInterval(updateCheckInterval);
     }
 
-    // Check for updates every 30 minutes (1800000 ms)
     updateCheckInterval = setInterval(() => {
         console.log('Performing periodic update check...');
         checkForUpdates();
@@ -315,11 +297,7 @@ function stopPeriodicUpdateChecks() {
 }
 
 /**
- * Displays a notification to the user when a new version of the app is ready.
- * The notification includes a button that allows the user to activate the new
- * service worker, which will then reload the page to apply the updates.
- * @param {ServiceWorker} newWorker - The new service worker that is waiting to be activated.
- * @returns {void}
+ * FIXED: Displays update notification with higher z-index and prevents removal conflicts
  */
 function showUpdateNotification(newWorker) {
     // Remove any existing update notification
@@ -341,7 +319,7 @@ function showUpdateNotification(newWorker) {
         padding: 20px;
         border-radius: 12px;
         box-shadow: 0 8px 32px rgba(0,0,0,0.3);
-        z-index: 1000;
+        z-index: 9999;
         display: flex;
         align-items: center;
         gap: 15px;
@@ -379,32 +357,38 @@ function showUpdateNotification(newWorker) {
         ">&times;</button>
     `;
 
-    // Add CSS animation
-    const style = document.createElement('style');
-    style.textContent = `
-        @keyframes slideInUp {
-            from {
-                transform: translate(-50%, 100%);
-                opacity: 0;
+    // Add CSS animation if not already added
+    if (!document.getElementById('update-notification-styles')) {
+        const style = document.createElement('style');
+        style.id = 'update-notification-styles';
+        style.textContent = `
+            @keyframes slideInUp {
+                from {
+                    transform: translate(-50%, 100%);
+                    opacity: 0;
+                }
+                to {
+                    transform: translate(-50%, 0);
+                    opacity: 1;
+                }
             }
-            to {
-                transform: translate(-50%, 0);
-                opacity: 1;
+            #reload-button:hover {
+                 background: rgba(255,255,255,0.3) !important;
             }
-        }
-        #reload-button:hover {
-             background: rgba(255,255,255,0.3) !important;
-        }
-    `;
-    document.head.appendChild(style);
+        `;
+        document.head.appendChild(style);
+    }
 
     // Add the notification to the page
     document.body.appendChild(notification);
 
-    // Add click listener to the "Update Now" button
-    const reloadButton = document.getElementById('reload-button');
+    // FIXED: Use more specific event handling to prevent conflicts
+    const reloadButton = notification.querySelector('#reload-button');
+    const dismissButton = notification.querySelector('#dismiss-update');
+    
     if (reloadButton) {
-        reloadButton.addEventListener('click', () => {
+        reloadButton.addEventListener('click', (e) => {
+            e.stopPropagation();
             console.log('User chose to update the app');
             reloadButton.textContent = 'Updating...';
             reloadButton.disabled = true;
@@ -412,24 +396,27 @@ function showUpdateNotification(newWorker) {
         });
     }
 
-    // Add click listener to the dismiss button
-    const dismissButton = document.getElementById('dismiss-update');
     if (dismissButton) {
-        dismissButton.addEventListener('click', () => {
+        dismissButton.addEventListener('click', (e) => {
+            e.stopPropagation();
             console.log('User dismissed update notification');
             notification.remove();
         });
     }
 
-    // This listener correctly reloads the page AFTER the new service worker has taken control.
-    navigator.serviceWorker.addEventListener('controllerchange', () => {
+    // FIXED: Set up controller change listener only once per notification
+    const handleControllerChange = () => {
         console.log('New service worker activated, reloading page');
         window.location.reload();
-    });
+    };
+
+    // Remove any existing listeners to prevent multiple reloads
+    navigator.serviceWorker.removeEventListener('controllerchange', handleControllerChange);
+    navigator.serviceWorker.addEventListener('controllerchange', handleControllerChange);
 
     // Auto-dismiss after 30 seconds if user doesn't interact
     setTimeout(() => {
-        if (document.getElementById('update-notification')) {
+        if (document.getElementById('update-notification') === notification) {
             console.log('Auto-dismissing update notification');
             notification.remove();
         }
@@ -459,7 +446,6 @@ function handleVisibilityChange() {
 
 /**
  * Initialize PWA functionality when the DOM is loaded.
- * This ensures all elements are available before we try to interact with them.
  */
 async function initializePWA() {
     console.log('Initializing PWA functionality...');
@@ -467,9 +453,9 @@ async function initializePWA() {
     // Register the service worker
     await registerServiceWorker();
 
-    // Set up the custom install button click handler
+    // FIXED: Only set up install button for non-iOS devices
     const installButton = document.getElementById('install-pwa-btn');
-    if (installButton) {
+    if (installButton && !isSafariOnIOS) {
         installButton.addEventListener('click', handleInstallClick);
     }
 
@@ -497,7 +483,6 @@ async function initializePWA() {
 if (document.readyState === 'loading') {
     document.addEventListener('DOMContentLoaded', initializePWA);
 } else {
-    // DOM is already loaded
     initializePWA();
 }
 
@@ -506,12 +491,13 @@ window.addEventListener('beforeunload', () => {
     stopPeriodicUpdateChecks();
 });
 
-// Export functions for debugging (optional)
+// Export functions for debugging
 if (typeof window !== 'undefined') {
     window.PWAManager = {
         checkForUpdates,
         startPeriodicUpdateChecks,
         stopPeriodicUpdateChecks,
-        isStandalone
+        isStandalone,
+        showCustomInstallPrompt: !isSafariOnIOS ? showCustomInstallPrompt : null
     };
 }
