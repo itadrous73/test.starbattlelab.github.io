@@ -38,7 +38,8 @@ const ALL_ASSETS = [
     './view.renderer.js',
     './solver.js',
     './mobile_import.js',
-    './PWA/unified-pwa-manager.js',
+    './PWA/pwa-manager.js',
+    './PWA/install-prompting.js',
 
     // --- PWA Icons ---
     './icons/favicon-96x96.png',
