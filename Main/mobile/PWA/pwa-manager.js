@@ -198,45 +198,45 @@ window.addEventListener('appinstalled', (e) => {
 // --- PWA SERVICE WORKER REGISTRATION AND UPDATE ---
 
 /**
- * Creates a small update icon and appends it to the body.
- */
+ * Creates a small update icon and appends it to the body.
+ */
 function createUpdateIcon() {
-    if (document.getElementById('update-icon')) {
-        return document.getElementById('update-icon');
-    }
+    if (document.getElementById('update-icon')) {
+        return document.getElementById('update-icon');
+    }
 
-    const iconDiv = document.createElement('div');
-    iconDiv.id = 'update-icon';
-    iconDiv.style.cssText = `
-        position: fixed;
-        bottom: 20px;
-        right: 20px;
-        width: 60px;
-        height: 60px;
-        background: linear-gradient(135deg, #0976ea 0%, #0d47a1 100%);
-        color: white;
-        border-radius: 50%;
-        box-shadow: 0 4px 12px rgba(0,0,0,0.3);
-        z-index: 9998;
-        display: none; /* Hidden by default */
-        align-items: center;
-        justify-content: center;
-        cursor: pointer;
-        transition: transform 0.2s ease-in-out, box-shadow 0.2s ease-in-out;
-    `;
-    iconDiv.innerHTML = `
-        <svg fill="#ffffff" width="30px" height="30px" viewBox="0 0 24 24" id="update" data-name="Flat Color" xmlns="http://www.w3.org/2000/svg" class="icon flat-color">
-            <path id="primary" d="M19,2a1,1,0,0,0-1,1V5.33A9,9,0,0,0,3,12a1,1,0,0,0,2,0A7,7,0,0,1,16.86,7H14a1,1,0,0,0,0,2h5a1,1,0,0,0,1-1V3A1,1,0,0,0,19,2Z" style="fill: #ffffff;"></path>
-            <path id="secondary" d="M20,11a1,1,0,0,0-1,1A7,7,0,0,1,7.11,17H10a1,1,0,0,0,0-2H5a1,1,0,0,0-1,1v5a1,1,0,0,0,2,0V18.67A9,9,0,0,0,21,12,1,1,0,0,0,20,11Z" style="fill: #ffffff;"></path>
-        </svg>
-    `;
+    const iconDiv = document.createElement('div');
+    iconDiv.id = 'update-icon';
+    iconDiv.style.cssText = `
+        position: fixed;
+        bottom: 20px;
+        right: 20px;
+        width: 60px;
+        height: 60px;
+        background: linear-gradient(135deg, #0976ea 0%, #0d47a1 100%);
+        color: white;
+        border-radius: 50%;
+        box-shadow: 0 4px 12px rgba(0,0,0,0.3);
+        z-index: 9998;
+        display: none; /* Hidden by default */
+        align-items: center;
+        justify-content: center;
+        cursor: pointer;
+        transition: transform 0.2s ease-in-out, box-shadow 0.2s ease-in-out;
+    `;
+    iconDiv.innerHTML = `
+        <svg fill="#ffffff" width="30px" height="30px" viewBox="0 0 24 24" id="update" data-name="Flat Color" xmlns="http://www.w3.org/2000/svg" class="icon flat-color">
+            <path id="primary" d="M19,2a1,1,0,0,0-1,1V5.33A9,9,0,0,0,3,12a1,1,0,0,0,2,0A7,7,0,0,1,16.86,7H14a1,1,0,0,0,0,2h5a1,1,0,0,0,1-1V3A1,1,0,0,0,19,2Z" style="fill: #ffffff;"></path>
+            <path id="secondary" d="M20,11a1,1,0,0,0-1,1A7,7,0,0,1,7.11,17H10a1,1,0,0,0,0-2H5a1,1,0,0,0-1,1v5a1,1,0,0,0,2,0V18.67A9,9,0,0,0,21,12,1,1,0,0,0,20,11Z" style="fill: #ffffff;"></path>
+        </svg>
+    `;
 
-    document.body.appendChild(iconDiv);
+    document.body.appendChild(iconDiv);
 
-    iconDiv.addEventListener('mouseover', () => iconDiv.style.boxShadow = '0 6px 18px rgba(0,0,0,0.4)');
-    iconDiv.addEventListener('mouseout', () => iconDiv.style.boxShadow = '0 4px 12px rgba(0,0,0,0.3)');
+    iconDiv.addEventListener('mouseover', () => iconDiv.style.boxShadow = '0 6px 18px rgba(0,0,0,0.4)');
+    iconDiv.addEventListener('mouseout', () => iconDiv.style.boxShadow = '0 4px 12px rgba(0,0,0,0.3)');
 
-    return iconDiv;
+    return iconDiv;
 }
 
 
@@ -253,19 +253,17 @@ async function registerServiceWorker() {
 
             console.log('Service Worker registered with scope:', registration.scope);
 
+            // --- MINIMAL MODIFICATION APPLIED FOR PERSISTENCE ---
+            // Check if a new service worker is already waiting to be activated.
+            // This handles the case where the user re-opens the PWA after an update
+            // was found in a previous session.
+            if (registration.waiting && navigator.serviceWorker.controller) {
+                console.log('A waiting service worker was found on startup.');
+                showUpdateNotification(registration.waiting);
+            }
+
             await checkForUpdates();
             registration.addEventListener('updatefound', handleUpdateFound);
-
-            setTimeout(() => {
-                if (
-                    registration.waiting &&
-                    navigator.serviceWorker.controller // ensures this isn't the first install
-                ) {
-                    console.log('Service worker is waiting to activate – showing update prompt');
-                    showUpdateNotification(registration.waiting);
-                }
-            }, 1000);
-
 
             if (registration.active) {
                 console.log('Service worker is active');
@@ -317,142 +315,142 @@ async function checkForUpdates() {
  * Displays a simplified update notification with a dismiss button.
  */
 function showUpdateNotification(newWorker) {
-    const existingNotification = document.getElementById('update-notification');
-    const notification = existingNotification || document.createElement('div');
+    const existingNotification = document.getElementById('update-notification');
+    const notification = existingNotification || document.createElement('div');
 
-    if (!existingNotification) {
-        notification.id = 'update-notification';
-        notification.style.cssText = `
-            position: fixed;
-            bottom: 20px;
-            left: 50%;
-            transform: translateX(-50%);
-            background: linear-gradient(135deg, #0976ea 0%, #0d47a1 100%);
-            color: white;
-            padding: 20px;
-            border-radius: 12px;
-            box-shadow: 0 8px 32px rgba(0,0,0,0.3);
-            z-index: 9999;
-            animation: slideInUp 0.3s ease-out;
-            width: 90%;
-            max-width: 850px;
-            min-width: 320px;
-            text-align: center;
-        `;
+    if (!existingNotification) {
+        notification.id = 'update-notification';
+        notification.style.cssText = `
+            position: fixed;
+            bottom: 20px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: linear-gradient(135deg, #0976ea 0%, #0d47a1 100%);
+            color: white;
+            padding: 20px;
+            border-radius: 12px;
+            box-shadow: 0 8px 32px rgba(0,0,0,0.3);
+            z-index: 9999;
+            animation: slideInUp 0.3s ease-out;
+            width: 90%;
+            max-width: 850px;
+            min-width: 320px;
+            text-align: center;
+        `;
 
-        document.body.appendChild(notification);
-    }
-    
-    // Ensure the notification is visible
-    notification.style.display = 'block';
+        document.body.appendChild(notification);
+    }
+    
+    // Ensure the notification is visible
+    notification.style.display = 'block';
 
-    notification.innerHTML = `
-        <button id="dismiss-update" style="
-            position: absolute;
-            top: 10px;
-            right: 15px;
-            background: none;
-            border: none;
-            color: white;
-            opacity: 0.8;
-            font-size: 20px;
-            line-height: 1;
-            padding: 0;
-            cursor: pointer;
-            width: 24px;
-            height: 24px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            border-radius: 50%;
-            transition: opacity 0.2s, background-color 0.2s;
-        " onmouseover="this.style.opacity='1'; this.style.backgroundColor='rgba(255,255,255,0.2)'" 
-           onmouseout="this.style.opacity='0.8'; this.style.backgroundColor='transparent'">&times;</button>
+    notification.innerHTML = `
+        <button id="dismiss-update" style="
+            position: absolute;
+            top: 10px;
+            right: 15px;
+            background: none;
+            border: none;
+            color: white;
+            opacity: 0.8;
+            font-size: 20px;
+            line-height: 1;
+            padding: 0;
+            cursor: pointer;
+            width: 24px;
+            height: 24px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 50%;
+            transition: opacity 0.2s, background-color 0.2s;
+        " onmouseover="this.style.opacity='1'; this.style.backgroundColor='rgba(255,255,255,0.2)'" 
+           onmouseout="this.style.opacity='0.8'; this.style.backgroundColor='transparent'">&times;</button>
 
-        <div style="display: flex; flex-direction: column; align-items: center; padding-right: 30px;">
-            <p style="margin: 0 0 12px 0; font-weight: 600; font-size: 1.1rem;">A new version is available!</p>
-            <button id="reload-button" style="
-                background: rgba(255,255,255,0.2);
-                border: 1px solid rgba(255,255,255,0.3);
-                color: white;
-                padding: 12px 25px;
-                border-radius: 8px;
-                cursor: pointer;
-                font-weight: 600;
-                font-size: 1rem;
-                transition: background-color 0.2s;
-                white-space: nowrap;
-                width: 100%;
-                max-width: 220px;
-            ">Install Now</button>
-        </div>
-    `;
+        <div style="display: flex; flex-direction: column; align-items: center; padding-right: 30px;">
+            <p style="margin: 0 0 12px 0; font-weight: 600; font-size: 1.1rem;">A new version is available!</p>
+            <button id="reload-button" style="
+                background: rgba(255,255,255,0.2);
+                border: 1px solid rgba(255,255,255,0.3);
+                color: white;
+                padding: 12px 25px;
+                border-radius: 8px;
+                cursor: pointer;
+                font-weight: 600;
+                font-size: 1rem;
+                transition: background-color 0.2s;
+                white-space: nowrap;
+                width: 100%;
+                max-width: 220px;
+            ">Install Now</button>
+        </div>
+    `;
 
-    // Add CSS animation if not already added
-    if (!document.getElementById('update-notification-styles')) {
-        const style = document.createElement('style');
-        style.id = 'update-notification-styles';
-        style.textContent = `
-            @keyframes slideInUp {
-                from {
-                    transform: translate(-50%, 100%);
-                    opacity: 0;
-                }
-                to {
-                    transform: translate(-50%, 0);
-                    opacity: 1;
-                }
-            }
-            #reload-button:hover {
-                background: rgba(255,255,255,0.3) !important;
-            }
-        `;
-        document.head.appendChild(style);
-    }
-    
-    // Create the update icon and set its click handler
-    updateIcon = createUpdateIcon();
-    updateIcon.onclick = () => {
-        notification.style.display = 'block';
-        updateIcon.style.display = 'none';
-    };
+    // Add CSS animation if not already added
+    if (!document.getElementById('update-notification-styles')) {
+        const style = document.createElement('style');
+        style.id = 'update-notification-styles';
+        style.textContent = `
+            @keyframes slideInUp {
+                from {
+                    transform: translate(-50%, 100%);
+                    opacity: 0;
+                }
+                to {
+                    transform: translate(-50%, 0);
+                    opacity: 1;
+                }
+            }
+            #reload-button:hover {
+                background: rgba(255,255,255,0.3) !important;
+            }
+        `;
+        document.head.appendChild(style);
+    }
+    
+    // Create the update icon and set its click handler
+    updateIcon = createUpdateIcon();
+    updateIcon.onclick = () => {
+        notification.style.display = 'block';
+        updateIcon.style.display = 'none';
+    };
 
-    // Event handlers for both buttons
-    const reloadButton = notification.querySelector('#reload-button');
-    const dismissButton = notification.querySelector('#dismiss-update');
-     
-    if (reloadButton) {
-        reloadButton.addEventListener('click', (e) => {
-            e.stopPropagation();
-            reloadButton.textContent = 'Installing...';
-            reloadButton.disabled = true;
-            newWorker.postMessage({ action: 'skipWaiting' });
-        });
-    }
+    // Event handlers for both buttons
+    const reloadButton = notification.querySelector('#reload-button');
+    const dismissButton = notification.querySelector('#dismiss-update');
+     
+    if (reloadButton) {
+        reloadButton.addEventListener('click', (e) => {
+            e.stopPropagation();
+            reloadButton.textContent = 'Installing...';
+            reloadButton.disabled = true;
+            newWorker.postMessage({ action: 'skipWaiting' });
+        });
+    }
 
-    if (dismissButton) {
-        dismissButton.addEventListener('click', (e) => {
-            e.stopPropagation();
-            notification.style.display = 'none';
-            updateIcon.style.display = 'flex';
-        });
-    }
+    if (dismissButton) {
+        dismissButton.addEventListener('click', (e) => {
+            e.stopPropagation();
+            notification.style.display = 'none';
+            updateIcon.style.display = 'flex';
+        });
+    }
 
-    // Set up controller change listener
-    const handleControllerChange = () => {
-        window.location.reload();
-    };
+    // Set up controller change listener
+    const handleControllerChange = () => {
+        window.location.reload();
+    };
 
-    navigator.serviceWorker.removeEventListener('controllerchange', handleControllerChange);
-    navigator.serviceWorker.addEventListener('controllerchange', handleControllerChange);
+    navigator.serviceWorker.removeEventListener('controllerchange', handleControllerChange);
+    navigator.serviceWorker.addEventListener('controllerchange', handleControllerChange);
 
-    // Auto-dismiss after 30 seconds if user doesn't interact
-    setTimeout(() => {
-        if (notification.style.display !== 'none') {
-            notification.style.display = 'none';
-            updateIcon.style.display = 'flex';
-        }
-    }, 30000);
+    // Auto-dismiss after 30 seconds if user doesn't interact
+    setTimeout(() => {
+        if (notification.style.display !== 'none') {
+            notification.style.display = 'none';
+            updateIcon.style.display = 'flex';
+        }
+    }, 30000);
 }
 
 
