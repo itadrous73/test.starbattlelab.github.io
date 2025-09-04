@@ -12,11 +12,11 @@
  */
 
 // Check if user is on Safari browser (any device) and not already installed
-const isSafari = /^((?!chrome|android|crios|fxios|opios).)*safari/i.test(navigator.userAgent) &&
+const isSafariCheck = /^((?!chrome|android|crios|fxios|opios).)*safari/i.test(navigator.userAgent) &&
                navigator.vendor && navigator.vendor.indexOf('Apple') > -1;
 const isInstalled = 'standalone' in window.navigator && window.navigator.standalone;
 
-if (isSafari && !isInstalled) {
+if (isSafariCheck && !isInstalled) {
     console.log('Safari detected - initializing install prompting');
     
     let promptShown = false;
