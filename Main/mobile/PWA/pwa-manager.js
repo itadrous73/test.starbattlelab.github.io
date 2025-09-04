@@ -353,7 +353,7 @@ function showUpdateNotification(newWorker) {
             <p style="margin: 0; font-weight: 600; font-size: 1.1rem;">A new version is available!</p>
         </div>
 
-        <div style="display: flex; justify-content: center;">
+        <div style="margin-top: 10px; text-align: center;">
             <button id="reload-button" style="
                 background: rgba(255,255,255,0.2);
                 border: 1px solid rgba(255,255,255,0.3);
