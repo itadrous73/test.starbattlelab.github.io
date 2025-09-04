@@ -323,7 +323,6 @@ function showUpdateNotification(newWorker) {
         max-width: min(500px, calc(100vw - 40px));
         animation: slideInUp 0.3s ease-out;
         text-align: center;
-        position: relative;
     `;
 
     /* --- FIXED INNER HTML WITH PROPER LAYOUT --- */
