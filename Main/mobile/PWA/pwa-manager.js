@@ -227,14 +227,13 @@ function createUpdateIcon() {
         outline: none;
     `;
     
-    // Simplified SVG with better color handling
     iconDiv.innerHTML = `
-        <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-            <path d="M21 2v6h-6"></path>
-            <path d="m15 8-5 5-4-4"></path>
-            <path d="M21 8A9 9 0 0 0 12 3a9 9 0 0 0-9 9 9 9 0 0 0 9 9"></path>
-        </svg>
+    <svg fill="#ffffff" width="30px" height="30px" viewBox="0 0 24 24" id="update" data-name="Flat Color" xmlns="http://www.w3.org/2000/svg" class="icon flat-color">
+      <path d="M20 17a8 8 0 0 1-13.66 5.66L4 20" stroke="#ffffff" stroke-width="4" stroke-linecap="round" stroke-linejoin="round" fill="none" />
+      <path d="M4 20v-6h6" stroke="#ffffff" stroke-width="4" stroke-linecap="round" stroke-linejoin="round" fill="none" />
+    </svg>
     `;
+
 
     document.body.appendChild(iconDiv);
 
