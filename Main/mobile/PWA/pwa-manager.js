@@ -213,11 +213,15 @@ async function registerServiceWorker() {
             registration.addEventListener('updatefound', handleUpdateFound);
 
             setTimeout(() => {
-                if (registration.waiting) {
-                    console.log('Service worker is still waiting – showing update prompt');
+                if (
+                    registration.waiting &&
+                    navigator.serviceWorker.controller // ensures this isn't the first install
+                ) {
+                    console.log('Service worker is waiting to activate – showing update prompt');
                     showUpdateNotification(registration.waiting);
                 }
-            }, 1000); // Delay 1 second to allow SW to settle
+            }, 1000);
+
 
             if (registration.active) {
                 console.log('Service worker is active');
