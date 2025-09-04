@@ -26,7 +26,7 @@ if (isSafariCheck && !isInstalled) {
         if (promptShown) return;
         
         const timeOnSite = Date.now() - startTime;
-        if (timeOnSite >= 3000) {
+        if (timeOnSite >= 1700) {
             showPrompt();
         }
     }
