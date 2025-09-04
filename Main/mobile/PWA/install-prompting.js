@@ -1,26 +1,25 @@
 /**
  * **********************************************************************************
- * Title: PWA Installation Prompting System (for iOS Safari)
+ * Title: PWA Installation Prompting System (for Safari)
  * **********************************************************************************
  * @author Isaiah Tadrous
- * @version 2.0.0
+ * @version 2.0.1
  * *-------------------------------------------------------------------------------
- * This script provides an  installation prompting system for Progressive
- * Web Apps, specifically targeting Apple users on the Safari browser. It tracks
+ * This script provides an installation prompting system for Progressive
+ * Web Apps, specifically targeting Safari browser users. It tracks
  * user engagement and presents installation prompts at optimal moments.
  * **********************************************************************************
  */
 
-// ONLY run on iOS Safari - be very specific
-const isIOSDevice = /iPad|iPhone|iPod/.test(navigator.userAgent) && !window.MSStream;
+// Check if user is on Safari browser (any device)
 const isSafariUA = /^((?!chrome|android|crios|fxios|opios).)*safari/i.test(navigator.userAgent);
 const isAppleVendor = navigator.vendor && navigator.vendor.indexOf('Apple') > -1;
-const isSafariOnIOS2 = isIOSDevice && isSafariUA && isAppleVendor;
+const isSafari = isSafariUA && isAppleVendor;
 
-// Only execute if on iOS Safari AND not already installed
-if (isSafariOnIOS2 && !('standalone' in window.navigator && window.navigator.standalone)) {
+// Only execute if on Safari AND not already installed
+if (isSafari && !('standalone' in window.navigator && window.navigator.standalone)) {
     
-    console.log('iOS Safari detected - initializing install prompting');
+    console.log('Safari detected - initializing install prompting');
     
     let userInteractions = 0;
     let timeOnSite = 0;
@@ -38,7 +37,7 @@ if (isSafariOnIOS2 && !('standalone' in window.navigator && window.navigator.sta
         ['click', 'scroll', 'touchstart'].forEach(event => {
             const listener = () => {
                 userInteractions++;
-                // MINIMAL CHANGE: Check conditions after the interaction
+                // Check conditions after the interaction
                 checkShowPrompt();
                 // Remove listener after first interaction to avoid repeated checks
                 document.removeEventListener(event, listener);
@@ -61,20 +60,20 @@ if (isSafariOnIOS2 && !('standalone' in window.navigator && window.navigator.sta
     function checkShowPrompt() {
         if (promptShown) return;
         if (timeOnSite >= 3000 && userInteractions >= 1) {
-            showIOSPrompt();
+            showSafariPrompt();
         }
     }
     
-    function showIOSPrompt() {
+    function showSafariPrompt() {
         if (promptShown) return;
         promptShown = true;
         
         // Remove any conflicting prompts first
-        const existing = document.getElementById('ios-install-prompt');
+        const existing = document.getElementById('safari-install-prompt');
         if (existing) existing.remove();
         
         const prompt = document.createElement('div');
-        prompt.id = 'ios-install-prompt';
+        prompt.id = 'safari-install-prompt';
         prompt.style.cssText = `
             position: fixed;
             bottom: 20px;
@@ -86,7 +85,7 @@ if (isSafariOnIOS2 && !('standalone' in window.navigator && window.navigator.sta
             border-radius: 12px;
             box-shadow: 0 8px 32px rgba(0,0,0,0.3);
             z-index: 10000;
-            animation: iosSlideUp 0.4s ease-out;
+            animation: safariSlideUp 0.4s ease-out;
             max-width: min(500px, calc(100vw - 40px));
             min-width: 320px;
         `;
@@ -106,12 +105,12 @@ if (isSafariOnIOS2 && !('standalone' in window.navigator && window.navigator.sta
                 </div>
             </div>
             <div style="display: flex; gap: 10px; margin-top: 15px;">
-                <button id="ios-install-yes" style="
+                <button id="safari-install-yes" style="
                     flex: 1; background: rgba(255,255,255,0.2); border: 1px solid rgba(255,255,255,0.3);
                     color: white; padding: 10px 15px; border-radius: 6px; font-weight: 600;
                     cursor: pointer; transition: all 0.2s;
                 ">Install</button>
-                <button id="ios-install-no" style="
+                <button id="safari-install-no" style="
                     background: transparent; border: 1px solid rgba(255,255,255,0.3);
                     color: white; padding: 10px 15px; border-radius: 6px;
                     cursor: pointer; transition: all 0.2s;
@@ -120,11 +119,11 @@ if (isSafariOnIOS2 && !('standalone' in window.navigator && window.navigator.sta
         `;
         
         // Add animation CSS
-        if (!document.getElementById('ios-install-styles')) {
+        if (!document.getElementById('safari-install-styles')) {
             const style = document.createElement('style');
-            style.id = 'ios-install-styles';
+            style.id = 'safari-install-styles';
             style.textContent = `
-                @keyframes iosSlideUp {
+                @keyframes safariSlideUp {
                     from {
                         transform: translateX(-50%) translateY(100%);
                         opacity: 0;
@@ -134,12 +133,12 @@ if (isSafariOnIOS2 && !('standalone' in window.navigator && window.navigator.sta
                         opacity: 1;
                     }
                 }
-                #ios-install-yes:hover, #ios-install-no:hover {
+                #safari-install-yes:hover, #safari-install-no:hover {
                     background: rgba(255,255,255,0.3) !important;
                     transform: translateY(-1px);
                 }
                 @media (max-width: 360px) {
-                    #ios-install-prompt {
+                    #safari-install-prompt {
                         left: 10px !important;
                         right: 10px !important;
                         transform: none !important;
@@ -154,19 +153,19 @@ if (isSafariOnIOS2 && !('standalone' in window.navigator && window.navigator.sta
         document.body.appendChild(prompt);
         
         // Handle buttons
-        document.getElementById('ios-install-yes').addEventListener('click', () => {
+        document.getElementById('safari-install-yes').addEventListener('click', () => {
             prompt.remove();
             showInstructions();
         });
         
-        document.getElementById('ios-install-no').addEventListener('click', () => {
+        document.getElementById('safari-install-no').addEventListener('click', () => {
             prompt.remove();
         });
     }
     
     function showInstructions() {
         const overlay = document.createElement('div');
-        overlay.id = 'ios-install-instructions';
+        overlay.id = 'safari-install-instructions';
         overlay.style.cssText = `
             position: fixed;
             inset: 0;
@@ -208,7 +207,7 @@ if (isSafariOnIOS2 && !('standalone' in window.navigator && window.navigator.sta
                 <li style="margin-bottom: 8px;">Scroll down and tap <strong>"Add to Home Screen"</strong></li>
                 <li>Tap <strong>"Add"</strong> to install the app</li>
             </ol>
-            <button id="ios-instructions-close" style="
+            <button id="safari-instructions-close" style="
                 width: 100%;
                 background: rgba(255,255,255,0.2);
                 border: 1px solid rgba(255,255,255,0.3);
@@ -222,9 +221,9 @@ if (isSafariOnIOS2 && !('standalone' in window.navigator && window.navigator.sta
         `;
         
         // Add modal animation
-        if (!document.getElementById('ios-modal-styles')) {
+        if (!document.getElementById('safari-modal-styles')) {
             const style = document.createElement('style');
-            style.id = 'ios-modal-styles';
+            style.id = 'safari-modal-styles';
             style.textContent = `
                 @keyframes modalZoomIn {
                     from {
@@ -236,7 +235,7 @@ if (isSafariOnIOS2 && !('standalone' in window.navigator && window.navigator.sta
                         transform: scale(1);
                     }
                 }
-                #ios-instructions-close:hover {
+                #safari-instructions-close:hover {
                     background: rgba(255,255,255,0.3) !important;
                 }
             `;
@@ -247,7 +246,7 @@ if (isSafariOnIOS2 && !('standalone' in window.navigator && window.navigator.sta
         document.body.appendChild(overlay);
         
         // Handle close
-        document.getElementById('ios-instructions-close').addEventListener('click', () => {
+        document.getElementById('safari-instructions-close').addEventListener('click', () => {
             overlay.remove();
         });
         
@@ -275,12 +274,12 @@ if (isSafariOnIOS2 && !('standalone' in window.navigator && window.navigator.sta
     }
     
     // Debug
-    window.iOSInstallPrompt = {
+    window.safariInstallPrompt = {
         checkShowPrompt,
-        showIOSPrompt,
+        showSafariPrompt,
         stats: () => ({ interactions: userInteractions, timeOnSite })
     };
     
 } else {
-    console.log('Not iOS Safari or already installed - iOS install prompting disabled');
+    console.log('Not Safari or already installed - Safari install prompting disabled');
 }
