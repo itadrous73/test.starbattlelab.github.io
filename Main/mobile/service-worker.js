@@ -15,8 +15,30 @@
 
 // --- SERVICE WORKER CONFIGURATION ---
 
-const CACHE_NAME = 'star-battle-cache-v1.0.0';
-const DYNAMIC_CACHE_NAME = 'star-battle-dynamic-v1.0.0';
+/**
+ * The static cache, used for the core "app shell."
+ * This cache is populated once during the 'install' event and is read from
+ * using a "cache-first" strategy. It holds all files essential for the
+ * app to run offline, including:
+ * - All JavaScript files (e.g., app.init.js, pwa-manager.js)
+ * - All CSS files (style.css, tailwind.css)
+ * - All puzzle text files from '/puzzles/Files/'
+ * - All icons from '/icons/'
+ * - All SnapGrid scripts from '/SnapGridScripts/'
+ * - The manifest.json file
+ */
+const CACHE_NAME = 'star-battle-cache-v1.1.0';
+
+/**
+ * The dynamic cache, used for resources fetched during runtime.
+ * This cache is updated using a "network-first" strategy. In this app,
+ * it primarily handles the main navigation request for 'index.html' to ensure
+ * the user gets the latest version if online, while still providing an
+ * offline fallback.
+ */
+const DYNAMIC_CACHE_NAME = 'star-battle-dynamic-v1.1.0';
+
+
 
 // --- COMPLETE LIST OF ASSETS TO CACHE FOR OFFLINE USE ---
 const ALL_ASSETS = [
@@ -107,11 +129,11 @@ self.addEventListener('install', event => {
             console.log('Opened cache and caching all application assets for offline use.');
             console.log(`Caching ${ALL_ASSETS.length} assets...`);
             
-            // Cache assets in batches to avoid overwhelming the browser
+            // Cache assets individually with error handling to prevent installation failure
             const cachePromises = ALL_ASSETS.map(asset => {
                 return cache.add(asset).catch(error => {
                     console.warn(`Failed to cache ${asset}:`, error);
-                    // Don't fail the entire installation if one asset fails
+                    // Continue installation even if individual assets fail to cache
                     return Promise.resolve();
                 });
             });
@@ -272,23 +294,6 @@ self.addEventListener('message', event => {
         console.log('Skipping waiting and activating new service worker');
         self.skipWaiting();
     }
-    
-    // Send back a confirmation message
-    if (event.ports && event.ports.length > 0) {
-        event.ports[0].postMessage({
-            action: 'message-received',
-            data: event.data
-        });
-    }
-});
-
-// Add error handling for unhandled errors
-self.addEventListener('error', event => {
-    console.error('Service Worker error:', event.error);
-});
-
-self.addEventListener('unhandledrejection', event => {
-    console.error('Service Worker unhandled rejection:', event.reason);
 });
 
 console.log('Service Worker script loaded successfully');
