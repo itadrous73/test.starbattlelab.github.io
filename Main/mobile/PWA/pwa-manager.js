@@ -66,7 +66,7 @@ function showCustomInstallPrompt() {
         padding: 20px;
         border-radius: 12px;
         box-shadow: 0 8px 32px rgba(0,0,0,0.3);
-        z-index: 9998;
+        z-index: 100;
         animation: slideInUp 0.4s ease-out;
         max-width: min(550px, calc(100vw - 40px));
         width: auto;
