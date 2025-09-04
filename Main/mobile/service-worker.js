@@ -15,8 +15,8 @@
 
 // --- SERVICE WORKER CONFIGURATION ---
 
-const CACHE_NAME = 'star-battle-cache-v6.0.0';
-const DYNAMIC_CACHE_NAME = 'star-battle-dynamic-v6.0.0';
+const CACHE_NAME = 'star-battle-cache-v7.0.0';
+const DYNAMIC_CACHE_NAME = 'star-battle-dynamic-v7.0.0';
 
 // --- COMPLETE LIST OF ASSETS TO CACHE FOR OFFLINE USE ---
 const ALL_ASSETS = [
