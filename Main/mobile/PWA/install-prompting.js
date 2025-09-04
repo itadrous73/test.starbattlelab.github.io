@@ -36,9 +36,14 @@ if (isSafariOnIOS2 && !('standalone' in window.navigator && window.navigator.sta
         
         // Track interactions
         ['click', 'scroll', 'touchstart'].forEach(event => {
-            document.addEventListener(event, () => {
+            const listener = () => {
                 userInteractions++;
-            }, { passive: true });
+                // MINIMAL CHANGE: Check conditions after the interaction
+                checkShowPrompt();
+                // Remove listener after first interaction to avoid repeated checks
+                document.removeEventListener(event, listener);
+            };
+            document.addEventListener(event, listener, { passive: true });
         });
         
         // Track app-specific interactions
@@ -80,7 +85,7 @@ if (isSafariOnIOS2 && !('standalone' in window.navigator && window.navigator.sta
             padding: 20px;
             border-radius: 12px;
             box-shadow: 0 8px 32px rgba(0,0,0,0.3);
-            z-index: 9997;
+            z-index: 10000;
             animation: iosSlideUp 0.4s ease-out;
             max-width: min(500px, calc(100vw - 40px));
             min-width: 320px;
