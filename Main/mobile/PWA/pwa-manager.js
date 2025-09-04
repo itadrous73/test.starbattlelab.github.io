@@ -323,25 +323,34 @@ function showUpdateNotification(newWorker) {
         max-width: min(500px, calc(100vw - 40px));
         animation: slideInUp 0.3s ease-out;
         text-align: center;
+        position: relative;
     `;
 
-    /* --- UPDATED INNER HTML --- */
+    /* --- FIXED INNER HTML WITH PROPER LAYOUT --- */
     notification.innerHTML = `
         <button id="dismiss-update" style="
             position: absolute;
-            top: 8px;
-            right: 12px;
+            top: 10px;
+            right: 15px;
             background: none;
             border: none;
             color: white;
-            opacity: 0.7;
-            font-size: 1.75rem;
+            opacity: 0.8;
+            font-size: 20px;
             line-height: 1;
-            padding: 5px;
+            padding: 0;
             cursor: pointer;
-        ">&times;</button>
+            width: 24px;
+            height: 24px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 50%;
+            transition: opacity 0.2s, background-color 0.2s;
+        " onmouseover="this.style.opacity='1'; this.style.backgroundColor='rgba(255,255,255,0.2)'" 
+           onmouseout="this.style.opacity='0.8'; this.style.backgroundColor='transparent'">&times;</button>
 
-        <div style="margin-bottom: 16px;">
+        <div style="margin-bottom: 16px; padding-right: 30px;">
             <p style="margin: 0; font-weight: 600; font-size: 1.1rem;">A new version is available!</p>
         </div>
 
