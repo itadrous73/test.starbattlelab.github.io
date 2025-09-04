@@ -755,6 +755,31 @@ function showUpdateNotificationForIcon() {
         </div>
     `;
 
+    if (!document.getElementById('update-notification-styles')) {
+        const style = document.createElement('style');
+        style.id = 'update-notification-styles';
+        style.textContent = `
+            @keyframes slideInUp {
+                from {
+                    transform: translate(-50%, 100%);
+                    opacity: 0;
+                }
+                to {
+                    transform: translate(-50%, 0);
+                    opacity: 1;
+                }
+            }
+            #reload-button:hover {
+                background: rgba(255,255,255,0.3) !important;
+            }
+            #dismiss-update:hover {
+                opacity: 1 !important;
+                background-color: rgba(255,255,255,0.2) !important;
+            }
+        `;
+        document.head.appendChild(style);
+    }
+
     document.body.appendChild(notification);
     updateIcon.style.display = 'none';
 
