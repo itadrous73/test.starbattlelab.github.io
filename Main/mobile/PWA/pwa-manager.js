@@ -37,6 +37,64 @@ const STORAGE_KEYS = {
 // --- PERSISTENT UPDATE STATE MANAGEMENT ---
 
 /**
+ * Set outdated flag - app has an update waiting
+ */
+function setOutdatedFlag() {
+    try {
+        localStorage.setItem(STORAGE_KEYS.OUTDATED_FLAG, 'true');
+        console.log('Outdated flag set - app needs update');
+    } catch (e) {
+        console.warn('Could not set outdated flag:', e);
+    }
+}
+
+/**
+ * Clear outdated flag - app is up to date
+ */
+function clearOutdatedFlag() {
+    try {
+        localStorage.removeItem(STORAGE_KEYS.OUTDATED_FLAG);
+        console.log('Outdated flag cleared - app is up to date');
+    } catch (e) {
+        console.warn('Could not clear outdated flag:', e);
+    }
+}
+
+/**
+ * Check if app is outdated
+ */
+function isAppOutdated() {
+    try {
+        return localStorage.getItem(STORAGE_KEYS.OUTDATED_FLAG) === 'true';
+    } catch (e) {
+        return false;
+    }
+}
+
+/**
+ * Perform update by reloading the page
+ * This clears the cache and activates any waiting service worker
+ */
+function performUpdate() {
+    console.log('Performing app update...');
+    clearOutdatedFlag();
+    
+    // Try to message any waiting service worker first
+    if (waitingServiceWorker) {
+        try {
+            waitingServiceWorker.postMessage({ action: 'skipWaiting' });
+        } catch (e) {
+            console.warn('Could not message waiting worker:', e);
+        }
+    }
+    
+    // Always reload to ensure update
+    setTimeout(() => {
+        window.location.reload(true);
+    }, 100);
+}
+
+/**
  * Store update availability state
  */
 function setUpdateAvailable(available) {
@@ -260,12 +318,6 @@ function showUpdateNotification(newWorker) {
     // Create update icon but keep it hidden initially
     updateIcon = createUpdateIcon();
     updateIcon.onclick = () => {
-        // Ensure we have a waiting worker reference
-        if (!waitingServiceWorker && registration && registration.waiting) {
-            waitingServiceWorker = registration.waiting;
-            console.log('Found waiting service worker when icon clicked');
-        }
-        
         notification.style.display = 'block';
         updateIcon.style.display = 'none';
         console.log('Update icon clicked, showing notification');
@@ -279,20 +331,12 @@ function showUpdateNotification(newWorker) {
         reloadButton.addEventListener('click', (e) => {
             e.stopPropagation();
             
-            // Clear the persistent outdated flag only when installing
-            console.log('User clicked install. Clearing outdated flag.');
-            localStorage.removeItem(STORAGE_KEYS.OUTDATED_FLAG);
-            
             reloadButton.textContent = 'Installing...';
             reloadButton.disabled = true;
             reloadButton.style.opacity = '0.7';
             
-            if (waitingServiceWorker) {
-                waitingServiceWorker.postMessage({ action: 'skipWaiting' });
-            } else {
-                console.warn('No waiting service worker found');
-                window.location.reload();
-            }
+            // Perform the update using our self-contained method
+            performUpdate();
         });
     }
 
@@ -305,15 +349,6 @@ function showUpdateNotification(newWorker) {
             console.log('Update notification dismissed, showing update icon');
         });
     }
-
-    // Set up controller change listener
-    const handleControllerChange = () => {
-        setUpdateAvailable(false); // Clear update state
-        window.location.reload();
-    };
-
-    navigator.serviceWorker.removeEventListener('controllerchange', handleControllerChange);
-    navigator.serviceWorker.addEventListener('controllerchange', handleControllerChange);
 
     // Auto-dismiss after 30 seconds but remember it was dismissed
     setTimeout(() => {
@@ -339,7 +374,7 @@ function handleUpdateFound() {
 
             if (newWorker.state === 'installed' && navigator.serviceWorker.controller) {
                 // Set the persistent outdated flag
-                localStorage.setItem(STORAGE_KEYS.OUTDATED_FLAG, 'true');
+                setOutdatedFlag();
                 
                 console.log('App is now marked as outdated. Showing notification.');
                 waitingServiceWorker = newWorker;
@@ -403,12 +438,8 @@ async function initializePWA() {
     await registerServiceWorker();
 
     // Check for persistent outdated flag on every startup
-    if (localStorage.getItem(STORAGE_KEYS.OUTDATED_FLAG) === 'true') {
+    if (isAppOutdated()) {
         console.log('Outdated flag found on startup. Showing update icon.');
-        // Try to find the waiting worker
-        if (registration && registration.waiting) {
-            waitingServiceWorker = registration.waiting;
-        }
         showUpdateIcon(); // Immediately show the small icon
     }
 
@@ -630,6 +661,14 @@ function createUpdateIcon() {
 
     document.body.appendChild(iconDiv);
 
+    // Handle click - show notification or directly update
+    iconDiv.addEventListener('click', () => {
+        if (isAppOutdated()) {
+            // Show the notification for confirmation
+            showUpdateNotificationForIcon();
+        }
+    });
+
     iconDiv.addEventListener('mouseover', () => {
         iconDiv.style.transform = 'scale(1.1)';
         iconDiv.style.boxShadow = '0 6px 18px rgba(0,0,0,0.4)';
@@ -641,6 +680,107 @@ function createUpdateIcon() {
     });
 
     return iconDiv;
+}
+
+/**
+ * Show update notification when icon is clicked
+ */
+function showUpdateNotificationForIcon() {
+    const existingNotification = document.getElementById('update-notification');
+    if (existingNotification) {
+        existingNotification.style.display = 'block';
+        updateIcon.style.display = 'none';
+        return;
+    }
+
+    // Create a simple notification for icon clicks
+    const notification = document.createElement('div');
+    notification.id = 'update-notification';
+    notification.style.cssText = `
+        position: fixed;
+        bottom: 20px;
+        left: 50%;
+        transform: translateX(-50%);
+        background: linear-gradient(135deg, #0976ea 0%, #0d47a1 100%);
+        color: white;
+        padding: 20px;
+        border-radius: 12px;
+        box-shadow: 0 8px 32px rgba(0,0,0,0.3);
+        z-index: 9999;
+        animation: slideInUp 0.3s ease-out;
+        width: 90%;
+        max-width: 850px;
+        min-width: 320px;
+        text-align: center;
+    `;
+
+    notification.innerHTML = `
+        <button id="dismiss-update" style="
+            position: absolute;
+            top: 10px;
+            right: 15px;
+            background: none;
+            border: none;
+            color: white;
+            opacity: 0.8;
+            font-size: 20px;
+            line-height: 1;
+            padding: 0;
+            cursor: pointer;
+            width: 24px;
+            height: 24px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 50%;
+            transition: opacity 0.2s, background-color 0.2s;
+        ">&times;</button>
+
+        <div style="display: flex; flex-direction: column; align-items: center; padding-right: 30px;">
+            <p style="margin: 0 0 12px 0; font-weight: 600; font-size: 1.1rem;">A new version is available!</p>
+            <button id="reload-button" style="
+                background: rgba(255,255,255,0.2);
+                border: 1px solid rgba(255,255,255,0.3);
+                color: white;
+                padding: 12px 25px;
+                border-radius: 8px;
+                cursor: pointer;
+                font-weight: 600;
+                font-size: 1rem;
+                transition: background-color 0.2s;
+                white-space: nowrap;
+                width: 100%;
+                max-width: 220px;
+            ">Install Now</button>
+        </div>
+    `;
+
+    document.body.appendChild(notification);
+    updateIcon.style.display = 'none';
+
+    // Add event handlers
+    const reloadButton = notification.querySelector('#reload-button');
+    const dismissButton = notification.querySelector('#dismiss-update');
+
+    if (reloadButton) {
+        reloadButton.addEventListener('click', (e) => {
+            e.stopPropagation();
+            reloadButton.textContent = 'Installing...';
+            reloadButton.disabled = true;
+            reloadButton.style.opacity = '0.7';
+            performUpdate();
+        });
+    }
+
+    if (dismissButton) {
+        dismissButton.addEventListener('click', (e) => {
+            e.stopPropagation();
+            notification.style.display = 'none';
+            setUpdateDismissed();
+            showUpdateIcon();
+            console.log('Update notification dismissed, showing update icon');
+        });
+    }
 }
 
 function isStandalone() {
@@ -676,6 +816,10 @@ if (typeof window !== 'undefined') {
         // New debugging functions
         setUpdateAvailable,
         isUpdateAvailable,
-        checkForWaitingServiceWorker
+        checkForWaitingServiceWorker,
+        setOutdatedFlag,
+        clearOutdatedFlag,
+        isAppOutdated,
+        performUpdate
     };
 }
