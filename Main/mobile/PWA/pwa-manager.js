@@ -297,7 +297,7 @@ function stopPeriodicUpdateChecks() {
 }
 
 /**
- * Displays an improved update notification with a better layout.
+ * Displays a simplified update notification.
  */
 function showUpdateNotification(newWorker) {
     // Remove any existing update notification
@@ -320,31 +320,15 @@ function showUpdateNotification(newWorker) {
         border-radius: 12px;
         box-shadow: 0 8px 32px rgba(0,0,0,0.3);
         z-index: 9999;
-        font-size: 1rem;
         max-width: min(500px, calc(100vw - 40px));
         animation: slideInUp 0.3s ease-out;
-        text-align: center; /* Center align the text */
+        text-align: center;
     `;
 
-    /* --- UPDATED INNER HTML & STYLES --- */
+    /* --- SIMPLIFIED INNER HTML --- */
     notification.innerHTML = `
-        <button id="dismiss-update" style="
-            position: absolute;
-            top: 8px;
-            right: 12px;
-            background: none;
-            border: none;
-            color: white;
-            opacity: 0.7;
-            font-size: 1.75rem;
-            line-height: 1;
-            padding: 5px;
-            cursor: pointer;
-        ">&times;</button>
-
         <div style="margin-bottom: 16px;">
             <p style="margin: 0; font-weight: 600; font-size: 1.1rem;">A new version is available!</p>
-            <p style="margin: 0; font-size: 0.9rem; opacity: 0.9; margin-top: 4px;">Update now to get the latest features.</p>
         </div>
 
         <div style="display: flex; justify-content: center;">
@@ -352,16 +336,16 @@ function showUpdateNotification(newWorker) {
                 background: rgba(255,255,255,0.2);
                 border: 1px solid rgba(255,255,255,0.3);
                 color: white;
-                padding: 12px 25px; /* Increased padding */
-                border-radius: 8px; /* Slightly larger radius */
+                padding: 12px 25px;
+                border-radius: 8px;
                 cursor: pointer;
                 font-weight: 600;
                 font-size: 1rem;
                 transition: background-color 0.2s;
                 white-space: nowrap;
-                width: 100%; /* Make button responsive */
-                max-width: 220px; /* Set a max-width for larger screens */
-            ">Update Now</button>
+                width: 100%;
+                max-width: 220px;
+            ">Install Now</button>
         </div>
     `;
 
@@ -390,45 +374,24 @@ function showUpdateNotification(newWorker) {
     // Add the notification to the page
     document.body.appendChild(notification);
 
-    // Use more specific event handling to prevent conflicts
     const reloadButton = notification.querySelector('#reload-button');
-    const dismissButton = notification.querySelector('#dismiss-update');
     
     if (reloadButton) {
         reloadButton.addEventListener('click', (e) => {
             e.stopPropagation();
-            console.log('User chose to update the app');
-            reloadButton.textContent = 'Updating...';
+            reloadButton.textContent = 'Installing...';
             reloadButton.disabled = true;
             newWorker.postMessage({ action: 'skipWaiting' });
         });
     }
 
-    if (dismissButton) {
-        dismissButton.addEventListener('click', (e) => {
-            e.stopPropagation();
-            console.log('User dismissed update notification');
-            notification.remove();
-        });
-    }
-
-    // Set up controller change listener only once per notification
+    // Set up controller change listener
     const handleControllerChange = () => {
-        console.log('New service worker activated, reloading page');
         window.location.reload();
     };
 
-    // Remove any existing listeners to prevent multiple reloads
     navigator.serviceWorker.removeEventListener('controllerchange', handleControllerChange);
     navigator.serviceWorker.addEventListener('controllerchange', handleControllerChange);
-
-    // Auto-dismiss after 30 seconds if user doesn't interact
-    setTimeout(() => {
-        if (document.getElementById('update-notification') === notification) {
-            console.log('Auto-dismissing update notification');
-            notification.remove();
-        }
-    }, 30000);
 }
 
 
