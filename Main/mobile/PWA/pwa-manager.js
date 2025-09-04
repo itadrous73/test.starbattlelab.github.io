@@ -225,8 +225,9 @@ function createUpdateIcon() {
         transition: transform 0.2s ease-in-out, box-shadow 0.2s ease-in-out;
     `;
     iconDiv.innerHTML = `
-        <svg xmlns="http://www.w3.org/2000/svg" width="30" height="30" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-            <path d="M2.97 12.95a9 9 0 1 0 1.95-3.32M12 2v10m-3-3 3-3 3 3"/>
+        <svg fill="#ffffff" width="30px" height="30px" viewBox="0 0 24 24" id="update" data-name="Flat Color" xmlns="http://www.w3.org/2000/svg" class="icon flat-color">
+            <path id="primary" d="M19,2a1,1,0,0,0-1,1V5.33A9,9,0,0,0,3,12a1,1,0,0,0,2,0A7,7,0,0,1,16.86,7H14a1,1,0,0,0,0,2h5a1,1,0,0,0,1-1V3A1,1,0,0,0,19,2Z" style="fill: #ffffff;"></path>
+            <path id="secondary" d="M20,11a1,1,0,0,0-1,1A7,7,0,0,1,7.11,17H10a1,1,0,0,0,0-2H5a1,1,0,0,0-1,1v5a1,1,0,0,0,2,0V18.67A9,9,0,0,0,21,12,1,1,0,0,0,20,11Z" style="fill: #ffffff;"></path>
         </svg>
     `;
 
