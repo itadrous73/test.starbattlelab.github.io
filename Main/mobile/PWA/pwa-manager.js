@@ -270,7 +270,7 @@ function showUpdateNotification(newWorker) {
             transition: opacity 0.2s, background-color 0.2s;
         ">&times;</button>
 
-        <div style="display: flex; flex-direction: column; align-items: center; padding-right: 30px;">
+        <div style="display: flex; flex-direction: column; align-items: center; padding: 0 30px;">
             <p style="margin: 0 0 12px 0; font-weight: 600; font-size: 1.1rem;">A new version is available!</p>
             <button id="reload-button" style="
                 background: rgba(255,255,255,0.2);
@@ -736,7 +736,7 @@ function showUpdateNotificationForIcon() {
             transition: opacity 0.2s, background-color 0.2s;
         ">&times;</button>
 
-        <div style="display: flex; flex-direction: column; align-items: center; padding-right: 30px;">
+        <div style="display: flex; flex-direction: column; align-items: center; padding: 0 30px;">
             <p style="margin: 0 0 12px 0; font-weight: 600; font-size: 1.1rem;">A new version is available!</p>
             <button id="reload-button" style="
                 background: rgba(255,255,255,0.2);
