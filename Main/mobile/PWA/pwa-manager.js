@@ -316,11 +316,14 @@ function showUpdateNotification(newWorker) {
         padding: 20px;
         border-radius: 12px;
         box-shadow: 0 8px 32px rgba(0,0,0,0.3);
-        z-index: 102;
-        max-width: min(700px, calc(100vw - 40px));
+        z-index: 9999;
         animation: slideInUp 0.3s ease-out;
+        width: 90%;
+        max-width: 850px;
+        min-width: 320px;
         text-align: center;
     `;
+
 
     notification.innerHTML = `
         <button id="dismiss-update" style="
