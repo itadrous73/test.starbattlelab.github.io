@@ -260,6 +260,12 @@ function showUpdateNotification(newWorker) {
     // Create update icon but keep it hidden initially
     updateIcon = createUpdateIcon();
     updateIcon.onclick = () => {
+        // Ensure we have a waiting worker reference
+        if (!waitingServiceWorker && registration && registration.waiting) {
+            waitingServiceWorker = registration.waiting;
+            console.log('Found waiting service worker when icon clicked');
+        }
+        
         notification.style.display = 'block';
         updateIcon.style.display = 'none';
         console.log('Update icon clicked, showing notification');
