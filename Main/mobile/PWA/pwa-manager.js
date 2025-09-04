@@ -28,6 +28,7 @@ const isSafariOnIOS = isIOS && isSafari && navigator.vendor && navigator.vendor.
 
 // --- STORAGE KEYS ---
 const STORAGE_KEYS = {
+    OUTDATED_FLAG: 'pwa_is_outdated',
     UPDATE_AVAILABLE: 'pwa_update_available',
     UPDATE_DISMISSED: 'pwa_update_dismissed',
     LAST_UPDATE_CHECK: 'pwa_last_update_check'
@@ -271,6 +272,11 @@ function showUpdateNotification(newWorker) {
     if (reloadButton) {
         reloadButton.addEventListener('click', (e) => {
             e.stopPropagation();
+            
+            // Clear the persistent outdated flag only when installing
+            console.log('User clicked install. Clearing outdated flag.');
+            localStorage.removeItem(STORAGE_KEYS.OUTDATED_FLAG);
+            
             reloadButton.textContent = 'Installing...';
             reloadButton.disabled = true;
             reloadButton.style.opacity = '0.7';
@@ -326,7 +332,10 @@ function handleUpdateFound() {
             console.log('New service worker state:', newWorker.state);
 
             if (newWorker.state === 'installed' && navigator.serviceWorker.controller) {
-                console.log('New version ready, showing update notification');
+                // Set the persistent outdated flag
+                localStorage.setItem(STORAGE_KEYS.OUTDATED_FLAG, 'true');
+                
+                console.log('App is now marked as outdated. Showing notification.');
                 waitingServiceWorker = newWorker;
                 showUpdateNotification(newWorker);
             }
@@ -373,11 +382,6 @@ function handleVisibilityChange() {
     }
 }
 
-// --- REST OF THE EXISTING CODE REMAINS THE SAME ---
-// (Include all the other functions from the original file)
-
-// ... [Include all other existing functions like showCustomInstallPrompt, createUpdateIcon, etc.]
-
 /**
  * Enhanced PWA initialization
  */
@@ -391,6 +395,16 @@ async function initializePWA() {
 
     // Register the service worker
     await registerServiceWorker();
+
+    // Check for persistent outdated flag on every startup
+    if (localStorage.getItem(STORAGE_KEYS.OUTDATED_FLAG) === 'true') {
+        console.log('Outdated flag found on startup. Showing update icon.');
+        // Try to find the waiting worker
+        if (registration && registration.waiting) {
+            waitingServiceWorker = registration.waiting;
+        }
+        showUpdateIcon(); // Immediately show the small icon
+    }
 
     const installButton = document.getElementById('install-pwa-btn');
     if (installButton && !isSafariOnIOS) {
