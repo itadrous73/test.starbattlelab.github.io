@@ -3,33 +3,22 @@
  * Title: PWA Installation Prompting System (for Safari)
  * **********************************************************************************
  * @author Isaiah Tadrous
- * @version 2.1.0
+ * @version 2.2.0
  * *-------------------------------------------------------------------------------
- * This script provides a time-based installation prompting system for Progressive
- * Web Apps, specifically targeting Safari browser users. It presents
- * an installation prompt after a set duration.
+ * This script provides an installation prompting system for Progressive
+ * Web Apps on Safari. It presents an installation prompt after a set delay.
  * **********************************************************************************
  */
 
 // Check if user is on Safari browser (any device) and not already installed
 const isSafariCheck = /^((?!chrome|android|crios|fxios|opios).)*safari/i.test(navigator.userAgent) &&
-               navigator.vendor && navigator.vendor.indexOf('Apple') > -1;
+                      navigator.vendor && navigator.vendor.indexOf('Apple') > -1;
 const isInstalled = 'standalone' in window.navigator && window.navigator.standalone;
 
 if (isSafariCheck && !isInstalled) {
     console.log('Safari detected - initializing install prompting');
     
     let promptShown = false;
-    const startTime = Date.now();
-    
-    function checkShowPrompt() {
-        if (promptShown) return;
-        
-        const timeOnSite = Date.now() - startTime;
-        if (timeOnSite >= 1700) {
-            showPrompt();
-        }
-    }
     
     function showPrompt() {
         if (promptShown) return;
@@ -94,7 +83,7 @@ if (isSafariCheck && !isInstalled) {
         });
         
         prompt.querySelector('#install-no').addEventListener('click', () => {
-            prompt.remove();
+            prompt.remove(); // This just hides the prompt for the current session.
         });
     }
     
@@ -171,24 +160,12 @@ if (isSafariCheck && !isInstalled) {
         style.id = 'install-styles';
         style.textContent = `
             @keyframes slideUp {
-                from {
-                    transform: translateX(-50%) translateY(100%);
-                    opacity: 0;
-                }
-                to {
-                    transform: translateX(-50%) translateY(0);
-                    opacity: 1;
-                }
+                from { transform: translateX(-50%) translateY(100%); opacity: 0; }
+                to { transform: translateX(-50%) translateY(0); opacity: 1; }
             }
             @keyframes zoomIn {
-                from {
-                    opacity: 0;
-                    transform: scale(0.9);
-                }
-                to {
-                    opacity: 1;
-                    transform: scale(1);
-                }
+                from { opacity: 0; transform: scale(0.9); }
+                to { opacity: 1; transform: scale(1); }
             }
             #install-yes:hover, #install-no:hover, #close-instructions:hover {
                 background: rgba(255,255,255,0.3) !important;
@@ -209,7 +186,8 @@ if (isSafariCheck && !isInstalled) {
     
     // Initialize
     function init() {
-        setTimeout(checkShowPrompt, 3000);
+        // CHANGED: Simplified to a single timer that calls showPrompt directly.
+        setTimeout(showPrompt, 3000);
     }
     
     if (document.readyState === 'loading') {
@@ -219,11 +197,10 @@ if (isSafariCheck && !isInstalled) {
     }
     
     // Debug access
+    // CHANGED: Simplified the debug object as time tracking was removed.
     window.safariInstallPrompt = {
         show: showPrompt,
-        check: checkShowPrompt,
         stats: () => ({
-            timeOnSite: Date.now() - startTime,
             promptShown
         })
     };
