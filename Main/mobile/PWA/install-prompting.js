@@ -15,10 +15,10 @@
 const isIOSDevice = /iPad|iPhone|iPod/.test(navigator.userAgent) && !window.MSStream;
 const isSafariUA = /^((?!chrome|android|crios|fxios|opios).)*safari/i.test(navigator.userAgent);
 const isAppleVendor = navigator.vendor && navigator.vendor.indexOf('Apple') > -1;
-const isSafariOnIOS = isIOSDevice && isSafariUA && isAppleVendor;
+const isSafariOnIOS2 = isIOSDevice && isSafariUA && isAppleVendor;
 
 // Only execute if on iOS Safari AND not already installed
-if (isSafariOnIOS && !('standalone' in window.navigator && window.navigator.standalone)) {
+if (isSafariOnIOS2 && !('standalone' in window.navigator && window.navigator.standalone)) {
     
     console.log('iOS Safari detected - initializing install prompting');
     
