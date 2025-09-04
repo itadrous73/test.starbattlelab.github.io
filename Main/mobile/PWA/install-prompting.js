@@ -3,74 +3,40 @@
  * Title: PWA Installation Prompting System (for Safari)
  * **********************************************************************************
  * @author Isaiah Tadrous
- * @version 2.0.1
+ * @version 2.1.0
  * *-------------------------------------------------------------------------------
- * This script provides an installation prompting system for Progressive
- * Web Apps, specifically targeting Safari browser users. It tracks
- * user engagement and presents installation prompts at optimal moments.
+ * This script provides a time-based installation prompting system for Progressive
+ * Web Apps, specifically targeting Safari browser users. It presents
+ * an installation prompt after a set duration.
  * **********************************************************************************
  */
 
-// Check if user is on Safari browser (any device)
-const isSafariUA = /^((?!chrome|android|crios|fxios|opios).)*safari/i.test(navigator.userAgent);
-const isAppleVendor = navigator.vendor && navigator.vendor.indexOf('Apple') > -1;
-const isSafari = isSafariUA && isAppleVendor;
+// Check if user is on Safari browser (any device) and not already installed
+const isSafari = /^((?!chrome|android|crios|fxios|opios).)*safari/i.test(navigator.userAgent) &&
+               navigator.vendor && navigator.vendor.indexOf('Apple') > -1;
+const isInstalled = 'standalone' in window.navigator && window.navigator.standalone;
 
-// Only execute if on Safari AND not already installed
-if (isSafari && !('standalone' in window.navigator && window.navigator.standalone)) {
-    
+if (isSafari && !isInstalled) {
     console.log('Safari detected - initializing install prompting');
     
-    let userInteractions = 0;
-    let timeOnSite = 0;
     let promptShown = false;
     const startTime = Date.now();
     
-    // Track engagement
-    function trackEngagement() {
-        // Update time
-        setInterval(() => {
-            timeOnSite = Date.now() - startTime;
-        }, 1000);
-        
-        // Track interactions
-        ['click', 'scroll', 'touchstart'].forEach(event => {
-            const listener = () => {
-                userInteractions++;
-                // Check conditions after the interaction
-                checkShowPrompt();
-                // Remove listener after first interaction to avoid repeated checks
-                document.removeEventListener(event, listener);
-            };
-            document.addEventListener(event, listener, { passive: true });
-        });
-        
-        // Track app-specific interactions
-        ['new-puzzle-btn', 'load-puzzle-btn', 'import-btn'].forEach(id => {
-            const el = document.getElementById(id);
-            if (el) {
-                el.addEventListener('click', () => {
-                    userInteractions += 2;
-                    setTimeout(checkShowPrompt, 1000);
-                });
-            }
-        });
-    }
-    
     function checkShowPrompt() {
         if (promptShown) return;
-        if (timeOnSite >= 3000 && userInteractions >= 1) {
-            showSafariPrompt();
+        
+        const timeOnSite = Date.now() - startTime;
+        if (timeOnSite >= 3000) {
+            showPrompt();
         }
     }
     
-    function showSafariPrompt() {
+    function showPrompt() {
         if (promptShown) return;
         promptShown = true;
         
-        // Remove any conflicting prompts first
-        const existing = document.getElementById('safari-install-prompt');
-        if (existing) existing.remove();
+        // Remove any existing prompts
+        document.getElementById('safari-install-prompt')?.remove();
         
         const prompt = document.createElement('div');
         prompt.id = 'safari-install-prompt';
@@ -85,7 +51,7 @@ if (isSafari && !('standalone' in window.navigator && window.navigator.standalon
             border-radius: 12px;
             box-shadow: 0 8px 32px rgba(0,0,0,0.3);
             z-index: 10000;
-            animation: safariSlideUp 0.4s ease-out;
+            animation: slideUp 0.4s ease-out;
             max-width: min(500px, calc(100vw - 40px));
             min-width: 320px;
         `;
@@ -105,12 +71,12 @@ if (isSafari && !('standalone' in window.navigator && window.navigator.standalon
                 </div>
             </div>
             <div style="display: flex; gap: 10px; margin-top: 15px;">
-                <button id="safari-install-yes" style="
+                <button id="install-yes" style="
                     flex: 1; background: rgba(255,255,255,0.2); border: 1px solid rgba(255,255,255,0.3);
                     color: white; padding: 10px 15px; border-radius: 6px; font-weight: 600;
                     cursor: pointer; transition: all 0.2s;
                 ">Install</button>
-                <button id="safari-install-no" style="
+                <button id="install-no" style="
                     background: transparent; border: 1px solid rgba(255,255,255,0.3);
                     color: white; padding: 10px 15px; border-radius: 6px;
                     cursor: pointer; transition: all 0.2s;
@@ -118,54 +84,22 @@ if (isSafari && !('standalone' in window.navigator && window.navigator.standalon
             </div>
         `;
         
-        // Add animation CSS
-        if (!document.getElementById('safari-install-styles')) {
-            const style = document.createElement('style');
-            style.id = 'safari-install-styles';
-            style.textContent = `
-                @keyframes safariSlideUp {
-                    from {
-                        transform: translateX(-50%) translateY(100%);
-                        opacity: 0;
-                    }
-                    to {
-                        transform: translateX(-50%) translateY(0);
-                        opacity: 1;
-                    }
-                }
-                #safari-install-yes:hover, #safari-install-no:hover {
-                    background: rgba(255,255,255,0.3) !important;
-                    transform: translateY(-1px);
-                }
-                @media (max-width: 360px) {
-                    #safari-install-prompt {
-                        left: 10px !important;
-                        right: 10px !important;
-                        transform: none !important;
-                        max-width: none !important;
-                        min-width: none !important;
-                    }
-                }
-            `;
-            document.head.appendChild(style);
-        }
-        
+        addStyles();
         document.body.appendChild(prompt);
         
-        // Handle buttons
-        document.getElementById('safari-install-yes').addEventListener('click', () => {
+        // Handle button clicks
+        prompt.querySelector('#install-yes').addEventListener('click', () => {
             prompt.remove();
             showInstructions();
         });
         
-        document.getElementById('safari-install-no').addEventListener('click', () => {
+        prompt.querySelector('#install-no').addEventListener('click', () => {
             prompt.remove();
         });
     }
     
     function showInstructions() {
         const overlay = document.createElement('div');
-        overlay.id = 'safari-install-instructions';
         overlay.style.cssText = `
             position: fixed;
             inset: 0;
@@ -187,7 +121,7 @@ if (isSafari && !('standalone' in window.navigator && window.navigator.standalon
             box-shadow: 0 20px 60px rgba(0,0,0,0.4);
             width: 100%;
             max-width: 500px;
-            animation: modalZoomIn 0.3s ease-out;
+            animation: zoomIn 0.3s ease-out;
         `;
         
         modal.innerHTML = `
@@ -207,7 +141,7 @@ if (isSafari && !('standalone' in window.navigator && window.navigator.standalon
                 <li style="margin-bottom: 8px;">Scroll down and tap <strong>"Add to Home Screen"</strong></li>
                 <li>Tap <strong>"Add"</strong> to install the app</li>
             </ol>
-            <button id="safari-instructions-close" style="
+            <button id="close-instructions" style="
                 width: 100%;
                 background: rgba(255,255,255,0.2);
                 border: 1px solid rgba(255,255,255,0.3);
@@ -220,51 +154,62 @@ if (isSafari && !('standalone' in window.navigator && window.navigator.standalon
             ">Got it!</button>
         `;
         
-        // Add modal animation
-        if (!document.getElementById('safari-modal-styles')) {
-            const style = document.createElement('style');
-            style.id = 'safari-modal-styles';
-            style.textContent = `
-                @keyframes modalZoomIn {
-                    from {
-                        opacity: 0;
-                        transform: scale(0.9);
-                    }
-                    to {
-                        opacity: 1;
-                        transform: scale(1);
-                    }
-                }
-                #safari-instructions-close:hover {
-                    background: rgba(255,255,255,0.3) !important;
-                }
-            `;
-            document.head.appendChild(style);
-        }
-        
         overlay.appendChild(modal);
         document.body.appendChild(overlay);
         
-        // Handle close
-        document.getElementById('safari-instructions-close').addEventListener('click', () => {
-            overlay.remove();
-        });
-        
+        // Handle close events
+        modal.querySelector('#close-instructions').addEventListener('click', () => overlay.remove());
         overlay.addEventListener('click', (e) => {
-            if (e.target === overlay) {
-                overlay.remove();
-            }
+            if (e.target === overlay) overlay.remove();
         });
     }
     
-    // Initialize when DOM is ready
-    function init() {
-        trackEngagement();
+    function addStyles() {
+        if (document.getElementById('install-styles')) return;
         
-        // Check after initial engagement
-        setTimeout(() => {
-            checkShowPrompt();
-        }, 3000);
+        const style = document.createElement('style');
+        style.id = 'install-styles';
+        style.textContent = `
+            @keyframes slideUp {
+                from {
+                    transform: translateX(-50%) translateY(100%);
+                    opacity: 0;
+                }
+                to {
+                    transform: translateX(-50%) translateY(0);
+                    opacity: 1;
+                }
+            }
+            @keyframes zoomIn {
+                from {
+                    opacity: 0;
+                    transform: scale(0.9);
+                }
+                to {
+                    opacity: 1;
+                    transform: scale(1);
+                }
+            }
+            #install-yes:hover, #install-no:hover, #close-instructions:hover {
+                background: rgba(255,255,255,0.3) !important;
+                transform: translateY(-1px);
+            }
+            @media (max-width: 360px) {
+                #safari-install-prompt {
+                    left: 10px !important;
+                    right: 10px !important;
+                    transform: none !important;
+                    max-width: none !important;
+                    min-width: none !important;
+                }
+            }
+        `;
+        document.head.appendChild(style);
+    }
+    
+    // Initialize
+    function init() {
+        setTimeout(checkShowPrompt, 3000);
     }
     
     if (document.readyState === 'loading') {
@@ -273,13 +218,16 @@ if (isSafari && !('standalone' in window.navigator && window.navigator.standalon
         init();
     }
     
-    // Debug
+    // Debug access
     window.safariInstallPrompt = {
-        checkShowPrompt,
-        showSafariPrompt,
-        stats: () => ({ interactions: userInteractions, timeOnSite })
+        show: showPrompt,
+        check: checkShowPrompt,
+        stats: () => ({
+            timeOnSite: Date.now() - startTime,
+            promptShown
+        })
     };
     
 } else {
-    console.log('Not Safari or already installed - Safari install prompting disabled');
+    console.log('Not Safari or already installed - install prompting disabled');
 }
