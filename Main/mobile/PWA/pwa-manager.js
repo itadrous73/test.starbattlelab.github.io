@@ -297,7 +297,7 @@ function stopPeriodicUpdateChecks() {
 }
 
 /**
- * FIXED: Displays update notification with higher z-index and prevents removal conflicts
+ * Displays an improved update notification with a better layout.
  */
 function showUpdateNotification(newWorker) {
     // Remove any existing update notification
@@ -320,41 +320,49 @@ function showUpdateNotification(newWorker) {
         border-radius: 12px;
         box-shadow: 0 8px 32px rgba(0,0,0,0.3);
         z-index: 9999;
-        display: flex;
-        align-items: center;
-        gap: 15px;
         font-size: 1rem;
-        max-width: min(550px, calc(100vw - 40px));
+        max-width: min(500px, calc(100vw - 40px));
         animation: slideInUp 0.3s ease-out;
+        text-align: center; /* Center align the text */
     `;
 
+    /* --- UPDATED INNER HTML & STYLES --- */
     notification.innerHTML = `
-        <div style="flex: 1;">
-            <p style="margin: 0; font-weight: 600;">A new version is available!</p>
-            <p style="margin: 0; font-size: 0.9rem; opacity: 0.9;">Update now to get the latest features.</p>
-        </div>
-        <button id="reload-button" style="
-            background: rgba(255,255,255,0.2);
-            border: 1px solid rgba(255,255,255,0.3);
-            color: white;
-            padding: 10px 20px;
-            border-radius: 6px;
-            cursor: pointer;
-            font-weight: 600;
-            font-size: 1rem;
-            transition: background-color 0.2s;
-            white-space: nowrap;
-        ">Update Now</button>
         <button id="dismiss-update" style="
-            background: transparent;
-            color: white;
+            position: absolute;
+            top: 8px;
+            right: 12px;
+            background: none;
             border: none;
-            opacity: 0.8;
-            padding: 5px;
-            cursor: pointer;
+            color: white;
+            opacity: 0.7;
             font-size: 1.75rem;
             line-height: 1;
+            padding: 5px;
+            cursor: pointer;
         ">&times;</button>
+
+        <div style="margin-bottom: 16px;">
+            <p style="margin: 0; font-weight: 600; font-size: 1.1rem;">A new version is available!</p>
+            <p style="margin: 0; font-size: 0.9rem; opacity: 0.9; margin-top: 4px;">Update now to get the latest features.</p>
+        </div>
+
+        <div style="display: flex; justify-content: center;">
+            <button id="reload-button" style="
+                background: rgba(255,255,255,0.2);
+                border: 1px solid rgba(255,255,255,0.3);
+                color: white;
+                padding: 12px 25px; /* Increased padding */
+                border-radius: 8px; /* Slightly larger radius */
+                cursor: pointer;
+                font-weight: 600;
+                font-size: 1rem;
+                transition: background-color 0.2s;
+                white-space: nowrap;
+                width: 100%; /* Make button responsive */
+                max-width: 220px; /* Set a max-width for larger screens */
+            ">Update Now</button>
+        </div>
     `;
 
     // Add CSS animation if not already added
@@ -382,7 +390,7 @@ function showUpdateNotification(newWorker) {
     // Add the notification to the page
     document.body.appendChild(notification);
 
-    // FIXED: Use more specific event handling to prevent conflicts
+    // Use more specific event handling to prevent conflicts
     const reloadButton = notification.querySelector('#reload-button');
     const dismissButton = notification.querySelector('#dismiss-update');
     
@@ -404,7 +412,7 @@ function showUpdateNotification(newWorker) {
         });
     }
 
-    // FIXED: Set up controller change listener only once per notification
+    // Set up controller change listener only once per notification
     const handleControllerChange = () => {
         console.log('New service worker activated, reloading page');
         window.location.reload();
