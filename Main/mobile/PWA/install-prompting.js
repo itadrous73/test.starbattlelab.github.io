@@ -41,7 +41,8 @@ if (isSafariCheck && !isInstalled) {
             box-shadow: 0 8px 32px rgba(0,0,0,0.3);
             z-index: 10000;
             animation: slideUp 0.4s ease-out;
-            max-width: min(600px, calc(100vw - 20px));
+            width: 90%;
+            max-width: 850px;
             min-width: 320px;
         `;
         
