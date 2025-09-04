@@ -349,26 +349,23 @@ function showUpdateNotification(newWorker) {
         " onmouseover="this.style.opacity='1'; this.style.backgroundColor='rgba(255,255,255,0.2)'" 
            onmouseout="this.style.opacity='0.8'; this.style.backgroundColor='transparent'">&times;</button>
 
-        <div style="margin-bottom: 16px; padding-right: 30px;">
-            <p style="margin: 0; font-weight: 600; font-size: 1.1rem;">A new version is available!</p>
-        </div>
-
-        <div style="margin-top: 10px; text-align: center;">
-            <button id="reload-button" style="
-                background: rgba(255,255,255,0.2);
-                border: 1px solid rgba(255,255,255,0.3);
-                color: white;
-                padding: 12px 25px;
-                border-radius: 8px;
-                cursor: pointer;
-                font-weight: 600;
-                font-size: 1rem;
-                transition: background-color 0.2s;
-                white-space: nowrap;
-                width: 100%;
-                max-width: 220px;
-            ">Install Now</button>
-        </div>
+<div style="display: flex; flex-direction: column; align-items: center; padding-right: 30px;">
+    <p style="margin: 0 0 12px 0; font-weight: 600; font-size: 1.1rem;">A new version is available!</p>
+    <button id="reload-button" style="
+        background: rgba(255,255,255,0.2);
+        border: 1px solid rgba(255,255,255,0.3);
+        color: white;
+        padding: 12px 25px;
+        border-radius: 8px;
+        cursor: pointer;
+        font-weight: 600;
+        font-size: 1rem;
+        transition: background-color 0.2s;
+        white-space: nowrap;
+        width: 100%;
+        max-width: 220px;
+    ">Install Now</button>
+</div>
     `;
 
     // Add CSS animation if not already added
