@@ -41,7 +41,7 @@ if (isSafariCheck && !isInstalled) {
             box-shadow: 0 8px 32px rgba(0,0,0,0.3);
             z-index: 10000;
             animation: slideUp 0.4s ease-out;
-            max-width: min(500px, calc(100vw - 40px));
+            max-width: min(600px, calc(100vw - 20px));
             min-width: 320px;
         `;
         
@@ -184,10 +184,8 @@ if (isSafariCheck && !isInstalled) {
         document.head.appendChild(style);
     }
     
-    // Initialize
     function init() {
-        // CHANGED: Simplified to a single timer that calls showPrompt directly.
-        setTimeout(showPrompt, 3000);
+        setTimeout(showPrompt, 700);
     }
     
     if (document.readyState === 'loading') {
