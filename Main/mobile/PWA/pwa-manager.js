@@ -30,8 +30,7 @@ const isSafariOnIOS = isIOS && isSafari && navigator.vendor && navigator.vendor.
 const STORAGE_KEYS = {
     OUTDATED_FLAG: 'pwa_is_outdated',
     UPDATE_AVAILABLE: 'pwa_update_available',
-    UPDATE_DISMISSED: 'pwa_update_dismissed',
-    LAST_UPDATE_CHECK: 'pwa_last_update_check'
+    UPDATE_DISMISSED: 'pwa_update_dismissed'
 };
 
 // --- PERSISTENT UPDATE STATE MANAGEMENT ---
@@ -182,7 +181,7 @@ async function registerServiceWorker() {
             // Check for waiting service worker immediately
             setTimeout(() => {
                 if (!checkForWaitingServiceWorker()) {
-                    // No waiting worker, check for updates
+                    // No waiting worker, check for service worker updates
                     checkForUpdates();
                 }
             }, 1000);
@@ -417,7 +416,7 @@ function handleVisibilityChange() {
         
         // Check for waiting worker first
         if (!checkForWaitingServiceWorker()) {
-            // Then check for new updates
+            // Perform additional update check for new service worker versions
             checkForUpdates();
         }
     }
@@ -814,14 +813,6 @@ function isStandalone() {
            document.referrer.includes('android-app://');
 }
 
-function simulateUpdate() {
-    console.log('Simulating update for testing...');
-    const mockWorker = {
-        postMessage: (msg) => console.log('Mock worker received message:', msg)
-    };
-    showUpdateNotification(mockWorker);
-}
-
 // Initialize when DOM is ready
 if (document.readyState === 'loading') {
     document.addEventListener('DOMContentLoaded', initializePWA);
@@ -836,9 +827,7 @@ if (typeof window !== 'undefined') {
         isStandalone,
         showCustomInstallPrompt: !isSafariOnIOS ? showCustomInstallPrompt : null,
         showUpdateIcon,
-        simulateUpdate,
         createUpdateIcon,
-        // New debugging functions
         setUpdateAvailable,
         isUpdateAvailable,
         checkForWaitingServiceWorker,
