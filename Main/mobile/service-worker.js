@@ -15,8 +15,8 @@
 
 // --- SERVICE WORKER CONFIGURATION ---
 
-const CACHE_NAME = 'star-battle-cache-v1.1.1';
-const DYNAMIC_CACHE_NAME = 'star-battle-dynamic-v1.1.1';
+const CACHE_NAME = 'star-battle-cache-v2.0.0';
+const DYNAMIC_CACHE_NAME = 'star-battle-dynamic-v2.0.0';
 
 // --- COMPLETE LIST OF ASSETS TO CACHE FOR OFFLINE USE ---
 const ALL_ASSETS = [
@@ -38,7 +38,7 @@ const ALL_ASSETS = [
     './view.renderer.js',
     './solver.js',
     './mobile_import.js',
-    './PWA/pwa-manager.js',
+    './PWA/unified-pwa-manager.js',
 
     // --- PWA Icons ---
     './icons/favicon-96x96.png',
