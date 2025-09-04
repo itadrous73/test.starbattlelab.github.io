@@ -297,7 +297,7 @@ function stopPeriodicUpdateChecks() {
 }
 
 /**
- * Displays a simplified update notification.
+ * Displays a simplified update notification with a dismiss button.
  */
 function showUpdateNotification(newWorker) {
     // Remove any existing update notification
@@ -325,8 +325,22 @@ function showUpdateNotification(newWorker) {
         text-align: center;
     `;
 
-    /* --- SIMPLIFIED INNER HTML --- */
+    /* --- UPDATED INNER HTML --- */
     notification.innerHTML = `
+        <button id="dismiss-update" style="
+            position: absolute;
+            top: 8px;
+            right: 12px;
+            background: none;
+            border: none;
+            color: white;
+            opacity: 0.7;
+            font-size: 1.75rem;
+            line-height: 1;
+            padding: 5px;
+            cursor: pointer;
+        ">&times;</button>
+
         <div style="margin-bottom: 16px;">
             <p style="margin: 0; font-weight: 600; font-size: 1.1rem;">A new version is available!</p>
         </div>
@@ -374,7 +388,9 @@ function showUpdateNotification(newWorker) {
     // Add the notification to the page
     document.body.appendChild(notification);
 
+    // Event handlers for both buttons
     const reloadButton = notification.querySelector('#reload-button');
+    const dismissButton = notification.querySelector('#dismiss-update');
     
     if (reloadButton) {
         reloadButton.addEventListener('click', (e) => {
@@ -385,6 +401,13 @@ function showUpdateNotification(newWorker) {
         });
     }
 
+    if (dismissButton) {
+        dismissButton.addEventListener('click', (e) => {
+            e.stopPropagation();
+            notification.remove();
+        });
+    }
+
     // Set up controller change listener
     const handleControllerChange = () => {
         window.location.reload();
@@ -392,6 +415,13 @@ function showUpdateNotification(newWorker) {
 
     navigator.serviceWorker.removeEventListener('controllerchange', handleControllerChange);
     navigator.serviceWorker.addEventListener('controllerchange', handleControllerChange);
+
+    // Auto-dismiss after 30 seconds if user doesn't interact
+    setTimeout(() => {
+        if (document.getElementById('update-notification') === notification) {
+            notification.remove();
+        }
+    }, 30000);
 }
 
 
