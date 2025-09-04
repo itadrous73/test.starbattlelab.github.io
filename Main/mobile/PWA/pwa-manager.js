@@ -18,7 +18,6 @@
 
 let deferredPrompt; 
 let registration; 
-let updateCheckInterval; 
 
 const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent) && !window.MSStream;
 const isSafari = /^((?!chrome|android|crios|fxios|opios).)*safari/i.test(navigator.userAgent);
@@ -193,7 +192,6 @@ window.addEventListener('appinstalled', (e) => {
     }
 
     showInstallSuccessMessage();
-    startPeriodicUpdateChecks();
 });
 
 // --- PWA SERVICE WORKER REGISTRATION AND UPDATE ---
@@ -214,16 +212,16 @@ async function registerServiceWorker() {
             await checkForUpdates();
             registration.addEventListener('updatefound', handleUpdateFound);
 
-            if (registration.waiting) {
-                console.log('Service worker is waiting, showing update notification');
-                showUpdateNotification(registration.waiting);
-            }
+            setTimeout(() => {
+                if (registration.waiting) {
+                    console.log('Service worker is still waiting – showing update prompt');
+                    showUpdateNotification(registration.waiting);
+                }
+            }, 1000); // Delay 1 second to allow SW to settle
 
             if (registration.active) {
                 console.log('Service worker is active');
             }
-
-            startPeriodicUpdateChecks();
 
         } catch (error) {
             console.error('Service Worker registration failed:', error);
@@ -266,32 +264,6 @@ async function checkForUpdates() {
     }
 }
 
-/**
- * Start periodic update checks (every 30 minutes)
- */
-function startPeriodicUpdateChecks() {
-    if (updateCheckInterval) {
-        clearInterval(updateCheckInterval);
-    }
-
-    updateCheckInterval = setInterval(() => {
-        console.log('Performing periodic update check...');
-        checkForUpdates();
-    }, 1800000); // 30 minutes
-
-    console.log('Started periodic update checks (every 30 minutes)');
-}
-
-/**
- * Stop periodic update checks
- */
-function stopPeriodicUpdateChecks() {
-    if (updateCheckInterval) {
-        clearInterval(updateCheckInterval);
-        updateCheckInterval = null;
-        console.log('Stopped periodic update checks');
-    }
-}
 
 /**
  * Displays a simplified update notification with a dismiss button.
@@ -491,17 +463,10 @@ if (document.readyState === 'loading') {
     initializePWA();
 }
 
-// Cleanup on page unload
-window.addEventListener('beforeunload', () => {
-    stopPeriodicUpdateChecks();
-});
-
 // Export functions for debugging
 if (typeof window !== 'undefined') {
     window.PWAManager = {
         checkForUpdates,
-        startPeriodicUpdateChecks,
-        stopPeriodicUpdateChecks,
         isStandalone,
         showCustomInstallPrompt: !isSafariOnIOS ? showCustomInstallPrompt : null
     };
