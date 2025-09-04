@@ -2,16 +2,17 @@
  * **********************************************************************************
  * Title: PWA Management and Update Notification System
  * **********************************************************************************
- * @author Isaiah Tadrous (Enhanced)
+ * @author Isaiah Tadrous
  * @version 1.3.0
  * *-------------------------------------------------------------------------------
- * Enhanced version that persists update notifications across app sessions
- * This script handles the registration of the service worker, manages the PWA
- * update lifecycle, and provides a custom install prompt experience. It detects
- * when a new version of the service worker is available, caches it in the
- * background, and then presents a notification to the user with an option to
- * refresh the page to activate the new version. It also manages the custom
- * install prompt and checks for updates every time the app starts.
+ * Comprehensive Progressive Web App management system that orchestrates service
+ * worker registration, update lifecycle management, and cross-session notification
+ * persistence. Provides seamless background update detection, intelligent caching
+ * strategies, and user friendly update prompts with automatic activation workflows.
+ * Features include custom installation prompts, periodic update checking, visibility
+ * change handling, and persistent state management across application sessions.
+ * Ensures optimal PWA experience with reliable offline functionality and smooth
+ * update deployment processes.
  * **********************************************************************************
  */
 
@@ -163,7 +164,7 @@ function checkForWaitingServiceWorker() {
 }
 
 /**
- * Enhanced service worker registration with immediate update check
+ * service worker registration with immediate update check
  */
 async function registerServiceWorker() {
     if ('serviceWorker' in navigator) {
@@ -186,7 +187,7 @@ async function registerServiceWorker() {
                 }
             }, 1000);
 
-            // Also check if there's already an update available from previous session
+            // Check if there's already an update available from previous session
             if (isUpdateAvailable() && !isUpdateDismissed()) {
                 if (registration.waiting) {
                     waitingServiceWorker = registration.waiting;
@@ -212,7 +213,7 @@ function showUpdateIcon() {
 }
 
 /**
- * Enhanced update notification that persists state
+ * Update notification that persists state
  */
 function showUpdateNotification(newWorker) {
     // Store the waiting worker reference
@@ -384,7 +385,7 @@ function handleUpdateFound() {
 }
 
 /**
- * Enhanced check for updates with better error handling
+ * Check for updates with better error handling
  */
 async function checkForUpdates() {
     if (registration) {
@@ -408,7 +409,7 @@ async function checkForUpdates() {
 }
 
 /**
- * Enhanced visibility change handler
+ * Visibility change handler
  */
 function handleVisibilityChange() {
     if (!document.hidden) {
@@ -423,7 +424,7 @@ function handleVisibilityChange() {
 }
 
 /**
- * Enhanced PWA initialization
+ * PWA initialization
  */
 async function initializePWA() {
     console.log('Initializing enhanced PWA functionality...');
@@ -447,7 +448,7 @@ async function initializePWA() {
         installButton.addEventListener('click', handleInstallClick);
     }
 
-    // Enhanced event listeners
+    // Event listeners
     document.addEventListener('visibilitychange', handleVisibilityChange);
     
     window.addEventListener('focus', () => {
@@ -474,7 +475,7 @@ async function initializePWA() {
     console.log('Enhanced PWA initialization complete');
 }
 
-// --- EXISTING PWA CUSTOM INSTALL PROMPT CODE ---
+// --- PWA CUSTOM INSTALL PROMPT CODE ---
 window.addEventListener('beforeinstallprompt', (e) => {
     if (isSafariOnIOS) {
         return;
