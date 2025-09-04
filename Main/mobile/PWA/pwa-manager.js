@@ -20,7 +20,6 @@ let deferredPrompt;
 let registration; 
 let updateCheckInterval; 
 
-// --- PLATFORM DETECTION (FIXED) ---
 const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent) && !window.MSStream;
 const isSafari = /^((?!chrome|android|crios|fxios|opios).)*safari/i.test(navigator.userAgent);
 const isSafariOnIOS = isIOS && isSafari && navigator.vendor && navigator.vendor.indexOf('Apple') > -1;
@@ -31,7 +30,6 @@ const isSafariOnIOS = isIOS && isSafari && navigator.vendor && navigator.vendor.
  * Listen for the beforeinstallprompt event - but ONLY for non-iOS devices
  */
 window.addEventListener('beforeinstallprompt', (e) => {
-    // FIXED: Only handle this event if NOT on iOS Safari (let install-prompting.js handle iOS)
     if (isSafariOnIOS) {
         return; // Let install-prompting.js handle iOS Safari
     }
@@ -48,7 +46,6 @@ window.addEventListener('beforeinstallprompt', (e) => {
  * Creates and displays a custom install prompt (NON-iOS only)
  */
 function showCustomInstallPrompt() {
-    // FIXED: Don't show if on iOS Safari
     if (isSafariOnIOS) return;
     
     // Avoid showing multiple prompts
@@ -319,13 +316,12 @@ function showUpdateNotification(newWorker) {
         padding: 20px;
         border-radius: 12px;
         box-shadow: 0 8px 32px rgba(0,0,0,0.3);
-        z-index: 9999;
-        max-width: min(500px, calc(100vw - 40px));
+        z-index: 102;
+        max-width: min(700px, calc(100vw - 40px));
         animation: slideInUp 0.3s ease-out;
         text-align: center;
     `;
 
-    /* --- FIXED INNER HTML WITH PROPER LAYOUT --- */
     notification.innerHTML = `
         <button id="dismiss-update" style="
             position: absolute;
@@ -460,7 +456,6 @@ async function initializePWA() {
     // Register the service worker
     await registerServiceWorker();
 
-    // FIXED: Only set up install button for non-iOS devices
     const installButton = document.getElementById('install-pwa-btn');
     if (installButton && !isSafariOnIOS) {
         installButton.addEventListener('click', handleInstallClick);
