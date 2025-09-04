@@ -59,18 +59,6 @@
           "sizes": "192x192"
         }
       ]
-    },
-    {
-      "name": "discord hub",
-      "short_name": "discord",
-      "description": "starbattle.org discord hub",
-      "url": "../../../Extensions/discord.html",
-      "icons": [
-        {
-          "src": "../icons/web-app-manifest-192x192.png",
-          "sizes": "192x192"
-        }
-      ]
     }
   ]
 }
