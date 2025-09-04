@@ -2,6 +2,7 @@
   "name": "StarBattle.org",
   "short_name": "StarBattle",
   "start_url": "../index.html",
+  "scope": "../",
   "display": "fullscreen",
   "orientation": "portrait",
   "background_color": "#1F2937",
@@ -51,10 +52,10 @@
       "name": "landing page or Home Page",
       "short_name": "Home",
       "description": "starbattle.org landing page",
-      "url": "../../index.html",
+      "url": "../index.html",
       "icons": [
         {
-          "src": "icons/web-app-manifest-192x192.png",
+          "src": "../icons/web-app-manifest-192x192.png",
           "sizes": "192x192"
         }
       ]
@@ -63,10 +64,10 @@
       "name": "discord hub",
       "short_name": "discord",
       "description": "starbattle.org discord hub",
-      "url": "../../Extensions/discord.html",
+      "url": "../../../Extensions/discord.html",
       "icons": [
         {
-          "src": "icons/web-app-manifest-192x192.png",
+          "src": "../icons/web-app-manifest-192x192.png",
           "sizes": "192x192"
         }
       ]
