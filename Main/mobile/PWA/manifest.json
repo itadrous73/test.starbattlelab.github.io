@@ -49,10 +49,10 @@
   ],
   "shortcuts": [
     {
-      "name": "landing page or Home Page",
-      "short_name": "Home",
+      "name": "landing page",
+      "short_name": "Home Page",
       "description": "starbattle.org landing page",
-      "url": "../index.html",
+      "url": "https://starbattle.org",
       "icons": [
         {
           "src": "../icons/web-app-manifest-192x192.png",
