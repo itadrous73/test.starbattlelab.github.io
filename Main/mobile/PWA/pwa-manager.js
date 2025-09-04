@@ -229,6 +229,11 @@ async function registerServiceWorker() {
             // Listen for updates to the service worker
             registration.addEventListener('updatefound', handleUpdateFound);
 
+            if (registration.waiting) {
+                console.log('Service worker is waiting, showing update notification');
+                showUpdateNotification(registration.waiting);
+            }
+
             // Listen for when the service worker becomes active
             if (registration.active) {
                 console.log('Service worker is active');
