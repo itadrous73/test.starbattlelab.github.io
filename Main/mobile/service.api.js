@@ -3,7 +3,7 @@
  * Title: Star Battle API and Data Management
  * **********************************************************************************
  * @author Isaiah Tadrous
- * @version 1.1.8
+ * @version 1.1.9
  * *-------------------------------------------------------------------------------
  * This script manages all asynchronous communication with the backend API for the
  * Star Battle puzzle application. Its responsibilities include fetching new
@@ -57,7 +57,14 @@ async function fetchNewPuzzle() {
             throw new Error(`No puzzles found in file ${puzzleDef.file}`);
         }
         
-        const randomSbn = puzzlesForSize[Math.floor(Math.random() * puzzlesForSize.length)];
+        let randomSbn = puzzlesForSize[Math.floor(Math.random() * puzzlesForSize.length)];
+        
+        // Avoid serving the exact same puzzle twice in a row if possible and there's more than one puzzle
+        if (puzzlesForSize.length > 1 && randomSbn === state.puzzleId) {
+            // Simple retry once to get a different one
+            randomSbn = puzzlesForSize[Math.floor(Math.random() * puzzlesForSize.length)];
+        }
+        
         const puzzleData = decodeSbn(randomSbn);
 
         if (!puzzleData) throw new Error('Failed to decode SBN from local file');
@@ -66,12 +73,14 @@ async function fetchNewPuzzle() {
         if (!grid) throw new Error('Failed to parse grid from decoded SBN');
 
         // Update global state with new puzzle data
+        state.puzzleId = randomSbn;
         state.regionGrid = grid;
         state.starsPerRegion = puzzleData.stars;
         state.sourcePuzzleData = { task: puzzleData.task, stars: puzzleData.stars };
         state.gridDim = dim;
         state.solution = null;
         state.isViewingSolution = false;
+        state.puzzleStartTime = new Date(); // Start timer
         gridContainer.classList.remove('solution-mode');
         updateSolutionButtonUI();
         
@@ -216,8 +225,8 @@ async function checkSolution(isManualCheck = false, lastStarCoords = null) {
 
         // Display result
         if (isCorrect && stars.length === gridDim * starsPerRegion) {
-            setStatus("Correct!", true);
             triggerSuccessAnimation(lastStarCoords);
+            showSuccessModal();
         } else if (isManualCheck) { // <<< THIS IS THE KEY CHANGE
             // Only show error messages if the check was manually triggered
             if (stars.length !== gridDim * starsPerRegion) {
@@ -251,12 +260,14 @@ async function importPuzzleString(importString) {
         if (!data) throw new Error('Could not recognize puzzle format');
 
         // Update state with imported puzzle data
+        state.puzzleId = importString.split('~')[0];
         state.gridDim = data.gridDim;
         state.starsPerRegion = data.starsPerRegion;
         state.regionGrid = data.regionGrid;
         state.sourcePuzzleData = { task: data.regionGrid.flat().join(','), stars: data.starsPerRegion };
         state.solution = null;
         state.isViewingSolution = false;
+        state.puzzleStartTime = new Date(); // Start/reset timer
         gridContainer.classList.remove('solution-mode');
         clearPuzzleState(); // Clear old state before loading new
 
@@ -391,5 +402,3 @@ function populateLoadModal() {
         modalContent.appendChild(item);
     });
 }
-
-
