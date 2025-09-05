@@ -3,7 +3,7 @@
  * * Title:       UI Management & Interaction Controller
  * *
  * * @author      Isaiah Tadrous
- * * @version     1.0.2
+ * * @version     1.0.3
  * * -------------------------------------------------------------------------------
  * * Description: This script manages the user interface (UI) and handles all user
  * * interactions for a web-based Star Battles. Its primary features include
@@ -415,4 +415,34 @@ function handleInteractionEnd(e) {
         redrawAllOverlays();
     }
 
+}
+
+/**
+ * Displays the success modal when a puzzle is solved correctly.
+ * Calculates and shows the time taken to solve.
+ * @returns {void}
+ */
+function showSuccessModal() {
+    if (!state.puzzleStartTime) {
+        timeTakenEl.textContent = 'N/A';
+    } else {
+        const endTime = new Date();
+        const timeDiff = Math.round((endTime - state.puzzleStartTime) / 1000); // in seconds
+        
+        const minutes = Math.floor(timeDiff / 60);
+        const seconds = timeDiff % 60;
+
+        const formattedTime = `${String(minutes).padStart(2, '0')}:${String(seconds).padStart(2, '0')}`;
+        timeTakenEl.textContent = formattedTime;
+    }
+
+    successModal.classList.remove('hidden');
+}
+
+/**
+ * Hides the success modal.
+ * @returns {void}
+ */
+function hideSuccessModal() {
+    successModal.classList.add('hidden');
 }
