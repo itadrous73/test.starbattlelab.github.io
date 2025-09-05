@@ -3,7 +3,7 @@
  * * Title:       UI Management & Interaction Controller
  * *
  * * @author      Isaiah Tadrous
- * * @version     1.0.1
+ * * @version     1.0.2
  * * -------------------------------------------------------------------------------
  * * Description: This script manages the user interface (UI) and handles all user
  * * interactions for a web-based Star Battles. Its primary features include
@@ -133,20 +133,23 @@ function updateModeUI() {
     toggleMarkBtn.style.display = isMarking ? 'block' : 'none';
 
     const showContextualControls = isDrawing || isBordering;
+    contextualControls.classList.toggle('hidden', !showContextualControls);
+    drawCanvas.style.pointerEvents = showContextualControls ? 'auto' : 'none';
 
     if (showContextualControls) {
-        contextualControls.classList.remove('hidden');
-        colorPickerWrapper.classList.remove('hidden');
-        if (isDrawing) {
-            brushSizeWrapper.classList.remove('hidden');
-        } else {
-            brushSizeWrapper.classList.add('hidden');
-        }
-    } else {
-        contextualControls.classList.add('hidden');
-    }
+        // Controls specific to Drawing mode
+        brushSizeWrapper.classList.toggle('hidden', !isDrawing);
 
-    drawCanvas.style.pointerEvents = showContextualControls ? 'auto' : 'none';
+        // Controls specific to Border mode
+        borderToolsWrapper.classList.toggle('hidden', !isBordering);
+        if (isBordering) {
+            borderEraserBtn.classList.toggle('selected', state.isBorderEraserActive);
+        }
+
+        // Color picker is shared but has conditions
+        const showColorPicker = isDrawing || (isBordering && !state.isBorderEraserActive);
+        colorPickerWrapper.classList.toggle('hidden', !showColorPicker);
+    }
 
     if (isDrawing) clearBtn.title = 'Clear all drawings';
     else if (isBordering) clearBtn.title = 'Clear all custom borders';
@@ -217,6 +220,7 @@ function handleInteractionStart(e) {
     state.isDragging = false;
     state.lastPos = pos;
     state.currentDragChanges = [];
+    state.currentEraseChanges = [];
 
     if (state.activeMode === 'draw') {
         preActionState = state.bufferCtx.getImageData(0, 0, state.bufferCanvas.width, state.bufferCanvas.height);
@@ -231,7 +235,7 @@ function handleInteractionStart(e) {
         };
         painter(drawCtx);
         if (state.bufferCtx) painter(state.bufferCtx);
-    } else if (state.activeMode === 'border') {
+    } else if (state.activeMode === 'border' && !state.isBorderEraserActive) {
         state.currentBorderPath = new Set([`${pos.row},${pos.col}`]);
         redrawAllOverlays();
     }
@@ -293,7 +297,19 @@ function handleInteractionMove(e) {
             if (state.bufferCtx) painter(state.bufferCtx);
         } else if (state.activeMode === 'border') {
             state.isDragging = true;
-            state.currentBorderPath.add(`${pos.row},${pos.col}`);
+            if (state.isBorderEraserActive) {
+                const cellCoord = `${pos.row},${pos.col}`;
+                for (let i = state.customBorders.length - 1; i >= 0; i--) {
+                    const border = state.customBorders[i];
+                    if (border.path.has(cellCoord) && !state.currentEraseChanges.some(c => c.cell === cellCoord)) {
+                        state.currentEraseChanges.push({ borderIndex: i, cell: cellCoord });
+                        border.path.delete(cellCoord);
+                        break;
+                    }
+                }
+            } else {
+                state.currentBorderPath.add(`${pos.row},${pos.col}`);
+            }
             redrawAllOverlays();
         }
         state.lastPos = pos;
@@ -316,7 +332,8 @@ function handleInteractionEnd(e) {
     if (!state.isLeftDown) return;
     if (e.changedTouches && e.changedTouches[0].identifier !== state.activeTouchId) return;
 
-    const wasDrawingBorder = state.activeMode === 'border' && state.currentBorderPath.size > 0;
+    const wasDrawingBorder = state.activeMode === 'border' && !state.isBorderEraserActive && state.currentBorderPath.size > 0;
+    const wasErasingBorder = state.activeMode === 'border' && state.isBorderEraserActive;
 
     if (state.activeMode === 'mark') {
         if (state.isDragging) {
@@ -352,12 +369,30 @@ function handleInteractionEnd(e) {
         const newBorder = { path: state.currentBorderPath, color: state.currentColor };
         state.customBorders.push(newBorder);
         pushHistory({ type: 'addBorder', border: newBorder });
+    } else if (wasErasingBorder) {
+        if (!state.isDragging) { // Handle single click erase
+            const { row, col } = state.lastPos;
+            const cellCoord = `${row},${col}`;
+            for (let i = state.customBorders.length - 1; i >= 0; i--) {
+                const border = state.customBorders[i];
+                if (border.path.has(cellCoord)) {
+                    state.currentEraseChanges.push({ borderIndex: i, cell: cellCoord });
+                    border.path.delete(cellCoord);
+                    redrawAllOverlays();
+                    break;
+                }
+            }
+        }
+        if (state.currentEraseChanges.length > 0) {
+            pushHistory({ type: 'compoundEraseBorder', changes: state.currentEraseChanges });
+        }
     }
 
     state.isLeftDown = false;
     state.isDragging = false;
     state.lastPos = null;
     state.currentDragChanges = [];
+    state.currentEraseChanges = [];
     preActionState = null;
     state.currentBorderPath = new Set();
     state.activeTouchId = null;
@@ -365,7 +400,7 @@ function handleInteractionEnd(e) {
     if (state.bufferCtx) state.bufferCtx.globalCompositeOperation = 'source-over';
 
     // Perform one final redraw to ensure the canvas is clean.
-    if (wasDrawingBorder) {
+    if (wasDrawingBorder || wasErasingBorder) {
         redrawAllOverlays();
     }
 
