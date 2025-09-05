@@ -139,6 +139,9 @@ function updateModeUI() {
     if (showContextualControls) {
         // Controls specific to Drawing mode
         brushSizeWrapper.classList.toggle('hidden', !isDrawing);
+        if (isDrawing) {
+            drawEraserBtn.classList.toggle('selected', state.isDrawEraserActive);
+        }
 
         // Controls specific to Border mode
         borderToolsWrapper.classList.toggle('hidden', !isBordering);
@@ -147,7 +150,7 @@ function updateModeUI() {
         }
 
         // Color picker is shared but has conditions
-        const showColorPicker = isDrawing || (isBordering && !state.isBorderEraserActive);
+        const showColorPicker = (isDrawing && !state.isDrawEraserActive) || (isBordering && !state.isBorderEraserActive);
         colorPickerWrapper.classList.toggle('hidden', !showColorPicker);
     }
 
@@ -225,7 +228,7 @@ function handleInteractionStart(e) {
     if (state.activeMode === 'draw') {
         preActionState = state.bufferCtx.getImageData(0, 0, state.bufferCanvas.width, state.bufferCanvas.height);
         const painter = (ctx) => {
-            ctx.globalCompositeOperation = 'source-over';
+            ctx.globalCompositeOperation = state.isDrawEraserActive ? 'destination-out' : 'source-over';
             ctx.lineCap = 'round';
             ctx.lineJoin = 'round';
             ctx.strokeStyle = state.currentColor;
