@@ -63,6 +63,7 @@ const htmlColorPicker = document.getElementById('html-color-picker'); // The nat
 const customColorBtn = document.getElementById('custom-color-btn'); // The button to trigger the color picker for a custom color.
 const borderToolsWrapper = document.getElementById('border-tools-wrapper'); // The container for border-specific tools like the eraser.
 const borderEraserBtn = document.getElementById('border-eraser-btn'); // The button to toggle border erasing.
+const drawEraserBtn = document.getElementById('draw-eraser-btn');
 
 // Settings modal elements
 const settingsBtn = document.getElementById('settings-btn'); // Button to open the settings modal.
