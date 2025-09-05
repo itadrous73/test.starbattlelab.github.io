@@ -3,7 +3,7 @@
  * Title: Star Battle Puzzle Game State and Configuration
  * **********************************************************************************
  * @author Isaiah Tadrous
- * @version 1.0.6
+ * @version 1.0.7
  * *-------------------------------------------------------------------------------
  * This script initializes and manages the entire state for a Star Battle puzzle
  * web application. It defines the central `state` object, which holds all dynamic
@@ -30,6 +30,7 @@ const state = {
     regionGrid: [], // A 2D array defining the shape of each region.
     playerGrid: [], // A 2D array storing the player's moves (stars, dots, 'x's).
     sourcePuzzleData: {}, // Holds the original, unmodified puzzle data from the API.
+    puzzleId: null, // The SBN string of the current puzzle, to avoid repeats.
 
     // --- History for Undo/Redo ---
     history: {
@@ -39,6 +40,7 @@ const state = {
     },
 
     // --- Gameplay State & Modes ---
+    puzzleStartTime: null, // Tracks when the current puzzle was started.
     markIsX: true, // Toggles the primary marking tool between an 'X' and a dot.
     isLoading: true, // Flag to show a loading indicator while fetching puzzles.
     solution: null, // Stores the solved puzzle data when fetched.
