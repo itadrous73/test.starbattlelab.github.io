@@ -3,7 +3,7 @@
  * Title: Star Battle UI Element References
  * **********************************************************************************
  * @author Isaiah Tadrous
- * @version 1.0.1
+ * @version 1.0.2
  * *-------------------------------------------------------------------------------
  * This script centralizes all DOM element references for the Star Battle web
  * application. It queries the document to obtain and store references to all
@@ -82,3 +82,12 @@ const modalCloseBtn = document.getElementById('modal-close-btn'); // The close b
 // Responsive UI elements
 const hamburgerMenuBtn = document.getElementById('hamburger-menu-btn'); // The hamburger menu button for mobile view.
 const puzzleActionsTab = document.getElementById('puzzle-actions-tab'); // The slide-out panel containing puzzle actions on mobile.
+
+// Success Modal Elements
+const successModal = document.getElementById('success-modal');
+const successModalCloseBtn = document.getElementById('success-modal-close-btn');
+const shareSuccessBtn = document.getElementById('share-success-btn');
+const timeTakenEl = document.getElementById('time-taken');
+const playAnotherBtn = document.getElementById('play-another-btn');
+const changeLevelBtn = document.getElementById('change-level-btn');
+const goHomeBtn = document.getElementById('go-home-btn');
