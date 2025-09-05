@@ -296,8 +296,16 @@ function handleInteractionMove(e) {
                 ctx.beginPath();
                 ctx.moveTo(pos.x, pos.y);
             };
-            painter(drawCtx);
-            if (state.bufferCtx) painter(state.bufferCtx);
+            if (state.isDrawEraserActive) {
+                // When erasing, only modify the buffer canvas. Then, call a full redraw
+                // to show the result without affecting the border overlay on the visible canvas.
+                if (state.bufferCtx) painter(state.bufferCtx);
+                redrawAllOverlays();
+            } else {
+                // For normal drawing, update both canvases for better performance.
+                painter(drawCtx);
+                if (state.bufferCtx) painter(state.bufferCtx);
+            }
         } else if (state.activeMode === 'border') {
             state.isDragging = true;
             if (state.isBorderEraserActive) {
