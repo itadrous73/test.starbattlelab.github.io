@@ -58,6 +58,7 @@ const state = {
     currentBorderPath: new Set(), // A set of cell coordinates for the border being drawn.
     customBorders: [], // Stores completed, custom-drawn border paths.
     isBorderEraserActive: false, // Toggles the border tool between drawing and erasing.
+    isDrawEraserActive: false,
     colorToReplace: null, // The color to be replaced by the flood fill tool.
     currentColorIndex: 0, // The index of the currently selected color in the palette.
     brushSize: 5, // The size of the brush for the drawing mode.
