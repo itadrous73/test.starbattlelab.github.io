@@ -3,7 +3,7 @@
  * Title: Star Battle Application Initializer and Event Wiring
  * **********************************************************************************
  * @author Isaiah Tadrous
- * @version 1.0.3
+ * @version 1.0.4
  * *-------------------------------------------------------------------------------
  * This script serves as the main entry point for the Star Battle web application.
  * It waits for the DOM to be fully loaded and then executes the primary `init`
@@ -297,6 +297,61 @@ document.addEventListener('DOMContentLoaded', () => {
 
         // Resize the canvas whenever the browser window is resized
         window.addEventListener('resize', resizeCanvas);
+        
+        // --- SUCCESS MODAL EVENT LISTENERS ---
+
+        addResponsiveListener(playAnotherBtn, () => {
+            hideSuccessModal();
+            fetchNewPuzzle();
+        });
+
+        addResponsiveListener(changeLevelBtn, () => {
+            hideSuccessModal();
+            showHomeScreen();
+        });
+
+        addResponsiveListener(goHomeBtn, () => {
+            hideSuccessModal();
+            showHomeScreen();
+        });
+
+        addResponsiveListener(successModalCloseBtn, hideSuccessModal);
+
+        // Close modal if user clicks on the backdrop
+        successModal.addEventListener('click', (e) => {
+            if (e.target === successModal) {
+                hideSuccessModal();
+            }
+        });
+
+        // Prevent clicks inside the modal content from closing it
+        const successModalContent = successModal.querySelector('div');
+        if (successModalContent) {
+            successModalContent.addEventListener('click', (e) => e.stopPropagation());
+        }
+
+        // Share button logic
+        addResponsiveListener(shareSuccessBtn, () => {
+            const time = timeTakenEl.textContent;
+            const shareText = `I just solved a ${state.gridDim}x${state.gridDim} Star Battle puzzle in ${time} on starbattle.org!`;
+            if (navigator.share) {
+                navigator.share({
+                    title: 'Star Battle Puzzle Solved!',
+                    text: shareText,
+                    url: window.location.href,
+                }).catch(err => console.log("Share API cancelled or failed.", err));
+            } else {
+                // Fallback for desktop/browsers that don't support Web Share API
+                navigator.clipboard.writeText(shareText).then(() => {
+                    hideSuccessModal();
+                    setStatus("Success message copied to clipboard!", true, 2500);
+                }).catch(err => {
+                    hideSuccessModal();
+                    setStatus("Could not copy message.", false, 2500);
+                    console.error('Fallback copy failed:', err);
+                });
+            }
+        });
 
         // --- FINAL INITIALIZATION ---
 
