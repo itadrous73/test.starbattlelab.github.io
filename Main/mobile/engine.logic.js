@@ -3,7 +3,7 @@
  * Title: Star Battle Game Logic and History Management
  * **********************************************************************************
  * @author Isaiah Tadrous
- * @version 1.0.2
+ * @version 1.0.3
  * *-------------------------------------------------------------------------------
  * This script contains the core game logic and state manipulation functions for
  * the Star Battle puzzle application. It is responsible for handling player
@@ -333,8 +333,12 @@ function undo() {
             state.customBorders.pop();
             redrawAllOverlays();
             break;
-        case 'removeCellFromBorder':
-            state.customBorders[change.borderIndex].path.add(change.cell);
+        case 'compoundEraseBorder':
+            change.changes.forEach(c => {
+                if (state.customBorders[c.borderIndex]) {
+                    state.customBorders[c.borderIndex].path.add(c.cell);
+                }
+            });
             redrawAllOverlays();
             break;
         case 'clearMarks':
@@ -385,8 +389,12 @@ function redo() {
             state.customBorders.push(change.border);
             redrawAllOverlays();
             break;
-        case 'removeCellFromBorder':
-            state.customBorders[change.borderIndex].path.delete(change.cell);
+        case 'compoundEraseBorder':
+            change.changes.forEach(c => {
+                if (state.customBorders[c.borderIndex]) {
+                    state.customBorders[c.borderIndex].path.delete(c.cell);
+                }
+            });
             redrawAllOverlays();
             break;
         case 'clearMarks':
