@@ -3,7 +3,7 @@
  * Title: Star Battle Puzzle Game State and Configuration
  * **********************************************************************************
  * @author Isaiah Tadrous
- * @version 1.0.5
+ * @version 1.0.6
  * *-------------------------------------------------------------------------------
  * This script initializes and manages the entire state for a Star Battle puzzle
  * web application. It defines the central `state` object, which holds all dynamic
@@ -50,12 +50,14 @@ const state = {
     isDragging: false, // Tracks if a drag operation is in progress.
     lastPos: null, // Stores the last known position (row, col) during a drag.
     currentDragChanges: [], // Batches cell changes from a single drag for a single undo action.
+    currentEraseChanges: [], // Batches border cells erased during a single drag action.
     activeTouchId: null, // Tracks the unique identifier of the active touch point to prevent multi-touch conflicts.
     animationFrameId: null, // Stores the ID for `requestAnimationFrame` to optimize drag-based drawing.
 
     // --- Drawing & Border Tool State ---
     currentBorderPath: new Set(), // A set of cell coordinates for the border being drawn.
     customBorders: [], // Stores completed, custom-drawn border paths.
+    isBorderEraserActive: false, // Toggles the border tool between drawing and erasing.
     colorToReplace: null, // The color to be replaced by the flood fill tool.
     currentColorIndex: 0, // The index of the currently selected color in the palette.
     brushSize: 5, // The size of the brush for the drawing mode.
@@ -182,6 +184,3 @@ const SBN_CODE_TO_DIM_MAP = {
     'NN': 23, 'OO': 24, 'PP': 25
 };
 const DIM_TO_SBN_CODE_MAP = Object.fromEntries(Object.entries(SBN_CODE_TO_DIM_MAP).map(([k, v]) => [v, k]));
-
-
-
