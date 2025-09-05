@@ -3,7 +3,7 @@
  * ===============================================================================
  *
  * @author Isaiah Tadrous
- * @version 1.1.7
+ * @version 1.1.8
  *
  * ------------------------------------------------------------------------------
  * Description:
@@ -212,6 +212,27 @@
                         </div>
                     </div>
                 </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Success Modal -->
+    <div id="success-modal" class="hidden fixed inset-0 bg-black bg-opacity-70 flex items-center justify-center z-50 p-4">
+        <div class="bg-gray-800 rounded-lg shadow-2xl p-6 w-full max-w-sm text-center relative">
+            <!-- Share and Close Buttons -->
+            <button id="share-success-btn" title="Share your success" class="absolute top-4 left-4 text-gray-400 hover:text-white">
+                <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 12v8a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-8"></path><polyline points="16 6 12 2 8 6"></polyline><line x1="12" y1="2" x2="12" y2="15"></line></svg>
+            </button>
+            <button id="success-modal-close-btn" class="absolute top-2 right-2 text-gray-400 hover:text-white text-4xl leading-none font-bold">&times;</button>
+    
+            <!-- Modal Content -->
+            <h2 class="text-3xl font-bold text-green-400 mb-4 mt-2">Puzzle Solved!</h2>
+            <p class="text-lg text-gray-300 mb-6">Time: <span id="time-taken" class="font-semibold text-white">00:00</span></p>
+    
+            <div class="flex flex-col gap-3">
+                <button id="play-another-btn" class="w-full px-4 py-3 bg-green-600 hover:bg-green-700 rounded-lg font-bold transition-all shadow-lg text-lg">Another Puzzle</button>
+                <button id="change-level-btn" class="w-full px-4 py-3 bg-blue-800 hover:bg-blue-900 rounded-lg font-semibold transition-all shadow-md text-lg">Change Level</button>
+                <button id="go-home-btn" class="w-full px-4 py-3 bg-gray-700 hover:bg-gray-600 rounded-lg font-semibold transition-all shadow-md text-lg">Home</button>
             </div>
         </div>
     </div>
