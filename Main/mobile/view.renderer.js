@@ -257,20 +257,26 @@ function drawSolutionOverlay() {
 
 /**
  * The main drawing loop. It clears the visible canvas and redraws all layers in
- * the correct order: the buffered free-form drawing, custom borders, and finally
+ * the correct order: custom borders, the buffered free-form drawing, and finally
  * the solution overlay if active.
  * @returns {void}
  */
 function redrawAllOverlays() {
     if (!drawCanvas.width || !drawCanvas.height) return;
     drawCtx.clearRect(0, 0, drawCanvas.width, drawCanvas.height);
-    // Draw the persistent drawing layer from the buffer
+
+    // Ensure the context is in the default composition mode to prevent eraser bugs.
+    drawCtx.globalCompositeOperation = 'source-over';
+
+    // Draw any user-made borders first.
+    drawCustomBorders();
+
+    // Draw the persistent drawing layer from the buffer on top of the borders.
     if (state.bufferCtx) {
         drawCtx.drawImage(state.bufferCanvas, 0, 0);
     }
-    // Draw any user-made borders on top
-    drawCustomBorders();
-    // Draw the solution overlay on top if active
+
+    // Draw the solution overlay on top if active.
     if (state.isViewingSolution) {
         drawSolutionOverlay();
     }
