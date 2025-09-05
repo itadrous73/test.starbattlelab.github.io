@@ -151,6 +151,10 @@ document.addEventListener('DOMContentLoaded', () => {
         addResponsiveListener(markModeBtn, () => switchMode('mark'));
         addResponsiveListener(drawModeBtn, () => switchMode('draw'));
         addResponsiveListener(borderModeBtn, () => switchMode('border'));
+        addResponsiveListener(borderEraserBtn, () => {
+            state.isBorderEraserActive = !state.isBorderEraserActive;
+            updateModeUI();
+        });
         addResponsiveListener(findSolutionBtn, handleSolutionToggle);
         addResponsiveListener(loadPuzzleBtn, () => {
             populateLoadModal();
@@ -302,3 +306,4 @@ document.addEventListener('DOMContentLoaded', () => {
     init();
 
 });
+
