@@ -151,6 +151,10 @@ document.addEventListener('DOMContentLoaded', () => {
         addResponsiveListener(markModeBtn, () => switchMode('mark'));
         addResponsiveListener(drawModeBtn, () => switchMode('draw'));
         addResponsiveListener(borderModeBtn, () => switchMode('border'));
+        addResponsiveListener(drawEraserBtn, () => {
+            state.isDrawEraserActive = !state.isDrawEraserActive;
+            updateModeUI();
+        });
         addResponsiveListener(borderEraserBtn, () => {
             state.isBorderEraserActive = !state.isBorderEraserActive;
             updateModeUI();
@@ -306,4 +310,3 @@ document.addEventListener('DOMContentLoaded', () => {
     init();
 
 });
-
