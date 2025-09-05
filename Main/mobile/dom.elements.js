@@ -3,7 +3,7 @@
  * Title: Star Battle UI Element References
  * **********************************************************************************
  * @author Isaiah Tadrous
- * @version 1.0.0
+ * @version 1.0.1
  * *-------------------------------------------------------------------------------
  * This script centralizes all DOM element references for the Star Battle web
  * application. It queries the document to obtain and store references to all
@@ -61,6 +61,8 @@ const brushSizeWrapper = document.getElementById('brush-size-wrapper'); // The c
 const colorPickerWrapper = document.getElementById('color-picker-wrapper'); // The container for all color selection UI.
 const htmlColorPicker = document.getElementById('html-color-picker'); // The native HTML input[type=color] element.
 const customColorBtn = document.getElementById('custom-color-btn'); // The button to trigger the color picker for a custom color.
+const borderToolsWrapper = document.getElementById('border-tools-wrapper'); // The container for border-specific tools like the eraser.
+const borderEraserBtn = document.getElementById('border-eraser-btn'); // The button to toggle border erasing.
 
 // Settings modal elements
 const settingsBtn = document.getElementById('settings-btn'); // Button to open the settings modal.
