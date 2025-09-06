@@ -480,22 +480,7 @@ function showSuccessModal() {
     if (!state.puzzleStartTime) {
         timeTakenEl.textContent = 'N/A';
     } else {
-        const endTime = new Date();
-        const timeDiff = endTime - state.puzzleStartTime; // in milliseconds
-        let formattedTime;
-
-        if (timeDiff > 5940000) { // 99 minutes
-            const hours = Math.floor(timeDiff / 3600000);
-            const minutes = Math.floor((timeDiff % 3600000) / 60000);
-            const seconds = Math.floor((timeDiff % 60000) / 1000);
-            formattedTime = `${String(hours).padStart(2, '0')}:${String(minutes).padStart(2, '0')}:${String(seconds).padStart(2, '0')}`;
-        } else {
-            const minutes = Math.floor(timeDiff / 60000);
-            const seconds = Math.floor((timeDiff % 60000) / 1000);
-            const milliseconds = timeDiff % 1000;
-            formattedTime = `${String(minutes).padStart(2, '0')}:${String(seconds).padStart(2, '0')}:${String(milliseconds).padStart(3, '0')}`;
-        }
-        timeTakenEl.textContent = formattedTime;
+        timeTakenEl.textContent = gameTimer.textContent;
     }
 
     successModal.classList.remove('hidden');
@@ -508,4 +493,5 @@ function showSuccessModal() {
 function hideSuccessModal() {
     successModal.classList.add('hidden');
 }
+
 
