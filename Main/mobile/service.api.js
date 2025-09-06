@@ -3,7 +3,7 @@
  * Title: Star Battle API and Data Management
  * **********************************************************************************
  * @author Isaiah Tadrous
- * @version 1.1.9
+ * @version 1.2.0
  * *-------------------------------------------------------------------------------
  * This script manages all asynchronous communication with the backend API for the
  * Star Battle puzzle application. Its responsibilities include fetching new
@@ -167,7 +167,6 @@ async function checkSolution(isManualCheck = false, lastStarCoords = null) {
             return;
         }
 
-        // ... (The entire middle section of the function for checking the puzzle remains unchanged)
         const stars = [];
         const rowCounts = Array(gridDim).fill(0);
         const colCounts = Array(gridDim).fill(0);
@@ -205,7 +204,6 @@ async function checkSolution(isManualCheck = false, lastStarCoords = null) {
             }
             if (adjacentFound) {
                 isCorrect = false;
-                //errorMessage = "Incorrect. Some stars are touching.";
                 break;
             }
         }
@@ -218,19 +216,23 @@ async function checkSolution(isManualCheck = false, lastStarCoords = null) {
             
             if (!countsAreValid) {
                 isCorrect = false;
-                //errorMessage = "Incorrect. Check star counts in rows, columns, or regions.";
             }
         }
-        // ... (End of the unchanged checking logic)
+
+        const allStarsPlaced = stars.length === gridDim * starsPerRegion;
 
         // Display result
-        if (isCorrect && stars.length === gridDim * starsPerRegion) {
+        if (isCorrect && allStarsPlaced) {
+            // Clear loading state BEFORE the animation starts
+            if (isManualCheck) {
+                setLoading(false);
+                setStatus("Correct!", true, 1000); // Briefly show success
+            }
             await triggerSuccessAnimation(lastStarCoords);
             showSuccessModal();
-        } else if (isManualCheck) { // <<< THIS IS THE KEY CHANGE
-            // Only show error messages if the check was manually triggered
-            if (stars.length !== gridDim * starsPerRegion) {
-                 //errorMessage = `Incorrect. You need ${gridDim * starsPerRegion} stars total.`;
+        } else if (isManualCheck) {
+            if (!allStarsPlaced) {
+                 errorMessage = `Incorrect. You need ${gridDim * starsPerRegion} stars total.`;
             }
             setStatus(errorMessage, false);
         }
