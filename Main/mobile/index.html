@@ -3,7 +3,7 @@
  * ===============================================================================
  *
  * @author Isaiah Tadrous
- * @version 1.1.8
+ * @version 1.1.7
  *
  * ------------------------------------------------------------------------------
  * Description:
@@ -37,7 +37,6 @@
 	<link rel="shortcut icon" href="icons/favicon.ico" />
 	<link rel="apple-touch-icon" sizes="180x180" href="icons/apple-touch-icon.png" />
 	
-	<!-- Redirection Script -->
 	<script>
         (function() {
             // On initial load, check if the screen is in portrait mode (height > width).
@@ -86,108 +85,6 @@
         }
         #reload-button:hover {
             background-color: #1d4ed8;
-        }
-        
-        /* Success Modal Styles */
-        .success-animation {
-            animation: successPulse 2s ease-out;
-        }
-        
-        @keyframes successPulse {
-            0% {
-                transform: scale(0.8);
-                opacity: 0;
-            }
-            50% {
-                transform: scale(1.05);
-            }
-            100% {
-                transform: scale(1);
-                opacity: 1;
-            }
-        }
-        
-        .modal-backdrop {
-            backdrop-filter: blur(8px);
-            background: rgba(0, 0, 0, 0.75);
-        }
-        
-        .success-icon {
-            background: linear-gradient(135deg, #10B981 0%, #059669 100%);
-            box-shadow: 0 0 30px rgba(16, 185, 129, 0.4);
-        }
-        
-        .time-badge {
-            background: linear-gradient(135deg, #1F2937 0%, #374151 100%);
-            border: 1px solid rgba(255, 255, 255, 0.1);
-        }
-        
-        .btn-primary {
-            background: linear-gradient(135deg, #10B981 0%, #059669 100%);
-            box-shadow: 0 4px 15px rgba(16, 185, 129, 0.3);
-            transition: all 0.3s ease;
-        }
-        
-        .btn-primary:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 8px 25px rgba(16, 185, 129, 0.4);
-        }
-        
-        .btn-secondary {
-            background: linear-gradient(135deg, #3B82F6 0%, #2563EB 100%);
-            box-shadow: 0 4px 15px rgba(59, 130, 246, 0.2);
-            transition: all 0.3s ease;
-        }
-        
-        .btn-secondary:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 8px 25px rgba(59, 130, 246, 0.3);
-        }
-        
-        .btn-tertiary {
-            background: linear-gradient(135deg, #4B5563 0%, #374151 100%);
-            border: 1px solid rgba(255, 255, 255, 0.1);
-            transition: all 0.3s ease;
-        }
-        
-        .btn-tertiary:hover {
-            background: linear-gradient(135deg, #6B7280 0%, #4B5563 100%);
-            transform: translateY(-1px);
-        }
-        
-        .action-btn {
-            position: relative;
-            overflow: hidden;
-        }
-        
-        .action-btn::before {
-            content: '';
-            position: absolute;
-            top: 50%;
-            left: 50%;
-            width: 0;
-            height: 0;
-            background: rgba(255, 255, 255, 0.1);
-            border-radius: 50%;
-            transform: translate(-50%, -50%);
-            transition: all 0.5s ease;
-        }
-        
-        .action-btn:active::before {
-            width: 300px;
-            height: 300px;
-        }
-        
-        .icon-btn {
-            background: rgba(255, 255, 255, 0.1);
-            backdrop-filter: blur(10px);
-            border: 1px solid rgba(255, 255, 255, 0.1);
-            transition: all 0.3s ease;
-        }
-        
-        .icon-btn:hover {
-            background: rgba(255, 255, 255, 0.15);
-            transform: scale(1.05);
         }
     </style>
 </head>
@@ -318,76 +215,20 @@
         </div>
     </div>
 
-    <!-- Success Modal -->
-    <div id="success-modal" class="hidden fixed inset-0 modal-backdrop flex items-center justify-center z-50 p-4">
-        <div class="success-animation bg-gray-800/95 backdrop-blur-xl rounded-2xl shadow-2xl border border-gray-700/50 p-8 w-full max-w-md text-center relative overflow-hidden">
-            
-            <!-- Decorative Background Elements -->
-            <div class="absolute -top-4 -right-4 w-24 h-24 bg-green-500/10 rounded-full blur-xl"></div>
-            <div class="absolute -bottom-4 -left-4 w-20 h-20 bg-blue-500/10 rounded-full blur-xl"></div>
-            
-            <!-- Action Buttons (Top Right) -->
-            <div class="absolute top-4 right-4 flex gap-2">
-                <button id="share-success-btn" class="icon-btn w-10 h-10 rounded-full flex items-center justify-center text-gray-400 hover:text-white" title="Share your success">
-                    <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                        <path d="M4 12v8a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-8"></path>
-                        <polyline points="16 6 12 2 8 6"></polyline>
-                        <line x1="12" y1="2" x2="12" y2="15"></line>
-                    </svg>
-                </button>
-                <button id="success-modal-close-btn" class="icon-btn w-10 h-10 rounded-full flex items-center justify-center text-gray-400 hover:text-white">
-                    <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                        <line x1="18" y1="6" x2="6" y2="18"></line>
-                        <line x1="6" y1="6" x2="18" y2="18"></line>
-                    </svg>
-                </button>
-            </div>
+    <div id="success-modal" class="hidden fixed inset-0 bg-black bg-opacity-70 flex items-center justify-center z-50 p-4">
+        <div class="bg-gray-800 rounded-lg shadow-2xl p-6 w-full max-w-sm text-center relative">
+            <button id="share-success-btn" title="Share your success" class="absolute top-4 left-4 text-gray-400 hover:text-white">
+                <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 12v8a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-8"></path><polyline points="16 6 12 2 8 6"></polyline><line x1="12" y1="2" x2="12" y2="15"></line></svg>
+            </button>
+            <button id="success-modal-close-btn" class="absolute top-2 right-2 text-gray-400 hover:text-white text-4xl leading-none font-bold">&times;</button>
     
-            <!-- Success Icon -->
-            <div class="success-icon w-20 h-20 mx-auto rounded-full flex items-center justify-center mb-6">
-                <svg xmlns="http://www.w3.org/2000/svg" width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="3" stroke-linecap="round" stroke-linejoin="round">
-                    <polyline points="20 6 9 17 4 12"></polyline>
-                </svg>
-            </div>
-            
-            <!-- Title -->
-            <h2 class="text-3xl font-bold text-white mb-2">Puzzle Solved!</h2>
-            <p class="text-gray-400 mb-6">Congratulations on completing the challenge</p>
-            
-            <!-- Time Badge -->
-            <div class="time-badge inline-flex items-center gap-2 px-4 py-2 rounded-full mb-8">
-                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="text-gray-400">
-                    <circle cx="12" cy="12" r="10"></circle>
-                    <polyline points="12 6 12 12 16 14"></polyline>
-                </svg>
-                <span class="text-sm text-gray-300">Time:</span>
-                <span id="time-taken" class="text-lg font-semibold text-white">00:00</span>
-            </div>
+            <h2 class="text-3xl font-bold text-green-400 mb-4 mt-2">Puzzle Solved!</h2>
+            <p class="text-lg text-gray-300 mb-6">Time: <span id="time-taken" class="font-semibold text-white">00:00</span></p>
     
-            <!-- Action Buttons -->
-            <div class="space-y-3">
-                <button id="play-another-btn" class="action-btn btn-primary w-full px-6 py-4 rounded-xl font-semibold text-white text-lg shadow-lg">
-                    Play Another Puzzle
-                </button>
-                
-                <div class="grid grid-cols-2 gap-3">
-                    <button id="change-level-btn" class="action-btn btn-secondary px-4 py-3 rounded-xl font-medium text-white">
-                        Change Level
-                    </button>
-                    <button id="go-home-btn" class="action-btn btn-tertiary px-4 py-3 rounded-xl font-medium text-gray-200">
-                        Go Home
-                    </button>
-                </div>
-            </div>
-            
-            <!-- Achievement Badge -->
-            <div class="mt-6 pt-4 border-t border-gray-700/50">
-                <div class="flex items-center justify-center gap-2 text-sm text-gray-400">
-                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                        <polygon points="12 2 15.09 8.26 22 9 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9 8.91 8.26 12 2"></polygon>
-                    </svg>
-                    <span>Puzzle Master • Keep up the great work!</span>
-                </div>
+            <div class="flex flex-col gap-3">
+                <button id="play-another-btn" class="w-full px-4 py-3 bg-green-600 hover:bg-green-700 rounded-lg font-bold transition-all shadow-lg text-lg">Another Puzzle</button>
+                <button id="change-level-btn" class="w-full px-4 py-3 bg-blue-800 hover:bg-blue-900 rounded-lg font-semibold transition-all shadow-md text-lg">Change Level</button>
+                <button id="go-home-btn" class="w-full px-4 py-3 bg-gray-700 hover:bg-gray-600 rounded-lg font-semibold transition-all shadow-md text-lg">Home</button>
             </div>
         </div>
     </div>
