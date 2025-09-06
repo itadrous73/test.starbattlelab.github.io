@@ -98,12 +98,12 @@ function updateTimer() {
         const hours = Math.floor(elapsed / 3600000);
         const minutes = Math.floor((elapsed % 3600000) / 60000);
         const seconds = Math.floor((elapsed % 60000) / 1000);
-        formattedTime = `Time: ${String(hours).padStart(2, '0')}:${String(minutes).padStart(2, '0')}:${String(seconds).padStart(2, '0')}`;
+        formattedTime = `${String(hours).padStart(2, '0')}:${String(minutes).padStart(2, '0')}:${String(seconds).padStart(2, '0')}`;
     } else {
         const minutes = Math.floor(elapsed / 60000);
         const seconds = Math.floor((elapsed % 60000) / 1000);
         const milliseconds = elapsed % 1000;
-        formattedTime = `Time: ${String(minutes).padStart(2, '0')}:${String(seconds).padStart(2, '0')}:${String(milliseconds).padStart(3, '0')}`;
+        formattedTime = `${String(minutes).padStart(2, '0')}:${String(seconds).padStart(2, '0')}:${String(milliseconds).padStart(3, '0')}`;
     }
 
     gameTimer.textContent = formattedTime;
@@ -117,7 +117,7 @@ function startTimer() {
     stopTimer(); // Ensure no multiple timers are running
     if (gameTimer) {
         gameTimer.classList.remove('hidden');
-        gameTimer.textContent = 'Time: 00:00:000';
+        gameTimer.textContent = '00:00:000';
     }
     // Update interval based on whether we need to show milliseconds
     const updateInterval = (new Date() - state.puzzleStartTime) > 5940000 ? 1000 : 50;
@@ -508,3 +508,4 @@ function showSuccessModal() {
 function hideSuccessModal() {
     successModal.classList.add('hidden');
 }
+
