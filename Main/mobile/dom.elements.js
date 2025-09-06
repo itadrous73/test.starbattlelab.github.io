@@ -88,6 +88,7 @@ const successModal = document.getElementById('success-modal');
 const successModalCloseBtn = document.getElementById('success-modal-close-btn');
 const shareSuccessBtn = document.getElementById('share-success-btn');
 const timeTakenEl = document.getElementById('time-taken');
+const gameTimer = document.getElementById('game-timer');
 const playAnotherBtn = document.getElementById('play-another-btn');
 const changeLevelBtn = document.getElementById('change-level-btn');
 const goHomeBtn = document.getElementById('go-home-btn');
