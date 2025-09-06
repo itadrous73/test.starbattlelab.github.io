@@ -27,7 +27,7 @@
  * - All SnapGrid scripts from '/SnapGridScripts/'
  * - The manifest.json file
  */
-const CACHE_NAME = 'star-battle-cache-v3.1.7';
+const CACHE_NAME = 'star-battle-cache-v3.1.8';
 
 /**
  * The dynamic cache, used for resources fetched during runtime.
@@ -36,7 +36,7 @@ const CACHE_NAME = 'star-battle-cache-v3.1.7';
  * the user gets the latest version if online, while still providing an
  * offline fallback.
  */
-const DYNAMIC_CACHE_NAME = 'star-battle-dynamic-v3.1.7';
+const DYNAMIC_CACHE_NAME = 'star-battle-dynamic-v3.1.8';
 
 
 
