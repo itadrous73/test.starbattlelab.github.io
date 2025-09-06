@@ -225,7 +225,7 @@ async function checkSolution(isManualCheck = false, lastStarCoords = null) {
 
         // Display result
         if (isCorrect && stars.length === gridDim * starsPerRegion) {
-            triggerSuccessAnimation(lastStarCoords);
+            await triggerSuccessAnimation(lastStarCoords);
             showSuccessModal();
         } else if (isManualCheck) { // <<< THIS IS THE KEY CHANGE
             // Only show error messages if the check was manually triggered
