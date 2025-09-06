@@ -181,6 +181,7 @@ function removeStarAndUndoAutoX(r, c) {
             pushHistory({ type: 'compoundMark', changes: [change] });
         }
     }
+	performAutoCheck({ r, c });
     updateErrorHighlightingUI();
 }
 
@@ -503,3 +504,4 @@ function loadSettings() {
         console.error("Could not load settings from local storage:", error);
     }
 }
+
