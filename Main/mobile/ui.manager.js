@@ -45,6 +45,7 @@ function showScreen(screenName) {
  */
 function showHomeScreen() {
     if(confirm("Are you sure you want to exit to the main menu? Your current progress will be lost unless saved.")) {
+        stopTimer();
         showScreen('home');
     }
 }
@@ -79,6 +80,59 @@ function setStatus(message, isSuccess, duration = 3000) {
     if (duration > 0) {
         setTimeout(() => solverStatus.classList.add('opacity-0'), duration);
     }
+}
+
+/**
+ * Updates the timer display on the UI. Switches format if time exceeds 99 minutes.
+ * @returns {void}
+ */
+function updateTimer() {
+    if (!state.puzzleStartTime || !gameTimer) return;
+
+    const now = new Date();
+    const elapsed = now - state.puzzleStartTime; // in milliseconds
+    let formattedTime;
+
+    // If elapsed time is over 99 minutes, switch to HH:MM:SS format
+    if (elapsed > 5940000) { // 99 minutes * 60 seconds * 1000 ms
+        const hours = Math.floor(elapsed / 3600000);
+        const minutes = Math.floor((elapsed % 3600000) / 60000);
+        const seconds = Math.floor((elapsed % 60000) / 1000);
+        formattedTime = `Time: ${String(hours).padStart(2, '0')}:${String(minutes).padStart(2, '0')}:${String(seconds).padStart(2, '0')}`;
+    } else {
+        const minutes = Math.floor(elapsed / 60000);
+        const seconds = Math.floor((elapsed % 60000) / 1000);
+        const milliseconds = elapsed % 1000;
+        formattedTime = `Time: ${String(minutes).padStart(2, '0')}:${String(seconds).padStart(2, '0')}:${String(milliseconds).padStart(3, '0')}`;
+    }
+
+    gameTimer.textContent = formattedTime;
+}
+
+/**
+ * Starts the gameplay timer.
+ * @returns {void}
+ */
+function startTimer() {
+    stopTimer(); // Ensure no multiple timers are running
+    if (gameTimer) {
+        gameTimer.classList.remove('hidden');
+        gameTimer.textContent = 'Time: 00:00:000';
+    }
+    // Update interval based on whether we need to show milliseconds
+    const updateInterval = (new Date() - state.puzzleStartTime) > 5940000 ? 1000 : 50;
+    state.timerInterval = setInterval(updateTimer, updateInterval);
+}
+
+/**
+ * Stops the gameplay timer.
+ * @returns {void}
+ */
+function stopTimer() {
+    if (state.timerInterval) {
+        clearInterval(state.timerInterval);
+        state.timerInterval = null;
+    }
 }
 
 /**
@@ -427,12 +481,20 @@ function showSuccessModal() {
         timeTakenEl.textContent = 'N/A';
     } else {
         const endTime = new Date();
-        const timeDiff = Math.round((endTime - state.puzzleStartTime) / 1000); // in seconds
-        
-        const minutes = Math.floor(timeDiff / 60);
-        const seconds = timeDiff % 60;
+        const timeDiff = endTime - state.puzzleStartTime; // in milliseconds
+        let formattedTime;
 
-        const formattedTime = `${String(minutes).padStart(2, '0')}:${String(seconds).padStart(2, '0')}`;
+        if (timeDiff > 5940000) { // 99 minutes
+            const hours = Math.floor(timeDiff / 3600000);
+            const minutes = Math.floor((timeDiff % 3600000) / 60000);
+            const seconds = Math.floor((timeDiff % 60000) / 1000);
+            formattedTime = `${String(hours).padStart(2, '0')}:${String(minutes).padStart(2, '0')}:${String(seconds).padStart(2, '0')}`;
+        } else {
+            const minutes = Math.floor(timeDiff / 60000);
+            const seconds = Math.floor((timeDiff % 60000) / 1000);
+            const milliseconds = timeDiff % 1000;
+            formattedTime = `${String(minutes).padStart(2, '0')}:${String(seconds).padStart(2, '0')}:${String(milliseconds).padStart(3, '0')}`;
+        }
         timeTakenEl.textContent = formattedTime;
     }
 
