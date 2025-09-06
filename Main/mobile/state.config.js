@@ -40,6 +40,7 @@ const state = {
     },
 
     // --- Gameplay State & Modes ---
+    timerInterval: null, // Holds the setInterval ID for the game timer.
     puzzleStartTime: null, // Tracks when the current puzzle was started.
     markIsX: true, // Toggles the primary marking tool between an 'X' and a dot.
     isLoading: true, // Flag to show a loading indicator while fetching puzzles.
