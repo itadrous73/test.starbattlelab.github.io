@@ -81,6 +81,7 @@ async function fetchNewPuzzle() {
         state.solution = null;
         state.isViewingSolution = false;
         state.puzzleStartTime = new Date(); // Start timer
+        startTimer();
         gridContainer.classList.remove('solution-mode');
         updateSolutionButtonUI();
         
@@ -223,6 +224,7 @@ async function checkSolution(isManualCheck = false, lastStarCoords = null) {
 
         // Display result
         if (isCorrect && allStarsPlaced) {
+            stopTimer();
             // Clear loading state BEFORE the animation starts
             if (isManualCheck) {
                 setLoading(false);
@@ -270,6 +272,7 @@ async function importPuzzleString(importString) {
         state.solution = null;
         state.isViewingSolution = false;
         state.puzzleStartTime = new Date(); // Start/reset timer
+        startTimer();
         gridContainer.classList.remove('solution-mode');
         clearPuzzleState(); // Clear old state before loading new
 
@@ -404,3 +407,4 @@ function populateLoadModal() {
         modalContent.appendChild(item);
     });
 }
+
